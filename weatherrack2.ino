@@ -28,10 +28,12 @@
 #include <ArduinoJson.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
+#include <TimerObject.h>
+
 
 // choose a valid PinChangeInterrupt pin of your Arduino board
-#define pinVel 8
-#define pinRain 9
+#define pinVel 9
+#define pinRain 10
 #define pinDir A0
 #define pinTmp 5
 #define ONE_WIRE_BUS pinTmp
@@ -39,74 +41,41 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 DeviceAddress thermometer = { 0x28, 0xC1, 0xD1, 0xDC, 0x06, 0x00, 0x00, 0xE7 };
 
-volatile long vel = 0;
+volatile unsigned long int vel = 0;
 volatile unsigned long int rain_cnt = 0;
+const float per_tip = 0.0110;
+int rpt_period = 3000.000;
+boolean debugger = false;
 
-const long int sc = 1000;
-const long int mn = 60000;
-const long int hr = 3600000;
-const long int dy = 86400000;
-
-float sec = 0;
-float rpt_vel = 0;
-float elapsed = 0;
-unsigned long int cur_millis = 0;
-unsigned long int last_millis = 0;
-int rpt_period = 3000;
-
-//5V
-//byte dirva_lu[8][2] = {
-//  {0.465,90},
-//  {0.8968,135},
-//  {1.3984,180},
-//  {3.0856,235},
-//  {2.2648,45},
-//  {3.8456,0},
-//  {4.3472,315},
-//  {4.636,270}
-//};
 //3.3V
-float volts[17] = {
-  2.53,
-  1.31,
-  1.42,
-  0.27,
-  0.30,
-  0.21,
-  0.59,
-  0.41,
-  0.92,
-  0.79,
-  2.03,
-  1.93,
+float volts[8] = {
   3.05,
-  2,67,
-  2.86,
-  2.26  
+  2.86,  
+  2.54,  
+  1.49,
+  0.31,
+  0.60,  
+  0.93,
+  2.03
 };
 
-int deg[16] = {
+int deg[8] = {
   0,
-  22,
   45,
-  67,
   90,
-  112,
   135,
-  157,
   180,
-  202,
   225,
-  247,
   270,
-  292,
-  315,
-  337  
+  315
 };
 
-char dirad_lu[17][4] = {"N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW","\0"};
 void velocity(void);
 void rain(void);
+void dbug();
+
+TimerObject *report = new TimerObject(rpt_period);
+TimerObject *debug  = new TimerObject(1000);
 //############################################3
 void setup() {
   Serial.begin(115200);
@@ -116,24 +85,39 @@ void setup() {
   pinMode(pinTmp, INPUT);
 
   attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(pinVel), velocity, RISING);
-  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(pinRain), rain, FALLING);
+  attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(pinRain), rain, RISING);
 
   sensors.begin();
   // set the resolution to 10 bit (good enough?)
   sensors.setResolution(thermometer, 10);
 
+  report->setOnTimer(&make_json);
+  report->Start();
+
+  debug->setOnTimer(&dbug);
+  if (debugger == true) {
+    debug->Start();
+  }
 }
 //#############################################
 void loop() {
-  cur_millis = millis();
-  elapsed = cur_millis - last_millis;
-  if ( elapsed >= rpt_period ) {
-    sec = elapsed * .001;
-    make_json();
-    Serial.println();
-    Serial.println("########"); 
-    vel = 0;  //reset velocity after each report period
-    last_millis = cur_millis;
+  report->Update();
+  if (debugger == true) {
+    debug->Update();
   }
 }
 //##########################################
+void dbug() {
+  Serial.println();
+  Serial.println("Debug Start");
+  Serial.print("Velocity Count ");
+  Serial.println(vel);
+  Serial.print("Rain Count ");
+  Serial.println(rain_cnt);
+  Serial.print("A0 value ");
+  Serial.println(analogRead(A0));
+  Serial.println("Debug End");
+  Serial.println();
+}
+//############################################
+

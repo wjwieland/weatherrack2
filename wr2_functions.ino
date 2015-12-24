@@ -1,49 +1,65 @@
 int get_dir() {
   float loval, hival;
-  float voltage = (3.0 / 1023) * analogRead(pinDir);
-  for (int a = 0; a < 16; a++) {
-    loval = (volts[a]) - 0.10; 
-    hival = (volts[a]) + 0.10;
+  float voltage = (analogRead(A0)) * (3.300 / 1024);
+  for (int a = 0; a < 8; a++) {
+    loval = (volts[a]) - 0.1; 
+    hival = (volts[a]) + 0.1;
     if ( (voltage <= hival) & (voltage >= loval) ) {
       return deg[a];
     }
   }
 }
 //####################################################
+//returns inches
 float get_rain() {
-  return rain_cnt * 0.011;
+  return (rain_cnt * per_tip) / 3 ;
 }
 //####################################################
-float get_rain_last_mn() {
-  
-}
-//####################################################
-bool make_json() {
+void make_json() {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
-  root["w_speed"] = get_speed(sec);
-  root["w_dir"] = get_dir();
-  root["rain"] = rain_cnt;
-  root["temp"] = get_temp();
+//  root["vel_cnt"] = vel;
+//  root["rain_cnt"] = rain_cnt;
+//  root["w_dir_v"] = (analogRead(A0)) * (3.300 / 1024);
+  root["vel"] = rpt_velocity();
+  root["dir"] = get_dir();
+  root["rain"] = get_rain();
+  root["rain_rate"] = rpt_rain_rate();
+  root["temp_F"] = rpt_temp();
   root.printTo(Serial);
+  Serial.println();
+  rain_cnt = 0;
+  vel = 0;  
+ }
+//###################################################
+// returns inches per second
+float rpt_rain_rate() {
+  float rate = ( (get_rain() ) / (rpt_period / 1000.000) );
+  return rate;
 }
 //####################################################
-float get_temp() {
+/* On Pin 5, uses OneWire protocol */
+float rpt_temp() {
   sensors.requestTemperatures();
   float tempC = sensors.getTempC(thermometer);
   float tmp =  DallasTemperature::toFahrenheit(tempC);
   return tmp;
 }
 //############################################
-float get_speed(float sec) {
-  return (vel / sec) * 1.492;
+// we get 3 interupt counts per round - returns intantaneous mph
+float rpt_velocity() {
+  float cur_vel = ( ((vel / 3.000 ) * 1.492) );/// (rpt_period/1000.000) );
+  return cur_vel;
 }
 //############################################
+//######## interupt driven functions #########
+//############################################
+/* On Pin 9 set as an interupt */
 void velocity() {
-  // increase value
   vel++;
 }
 //############################################
+/* On Pin 10 set as an interupt */
 void rain() {
   rain_cnt++;
 }
