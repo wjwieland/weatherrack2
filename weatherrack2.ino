@@ -44,7 +44,7 @@ DeviceAddress thermometer = { 0x28, 0xC1, 0xD1, 0xDC, 0x06, 0x00, 0x00, 0xE7 };
 volatile unsigned long int vel = 0;
 volatile unsigned long int rain_cnt = 0;
 const float per_tip = 0.0110;
-int rpt_period = 3000.000;
+int rpt_period = 15000.000;
 boolean debugger = false;
 
 //3.3V

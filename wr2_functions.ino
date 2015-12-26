@@ -21,11 +21,11 @@ void make_json() {
 //  root["vel_cnt"] = vel;
 //  root["rain_cnt"] = rain_cnt;
 //  root["w_dir_v"] = (analogRead(A0)) * (3.300 / 1024);
-  root["vel"] = rpt_velocity();
-  root["dir"] = get_dir();
-  root["rain"] = get_rain();
-  root["rain_rate"] = rpt_rain_rate();
-  root["temp_F"] = rpt_temp();
+  root["wv"] = rpt_velocity();
+  root["wd"] = get_dir();
+  root["ra"] = get_rain();
+  root["rr"] = rpt_rain_rate();
+  root["tF"] = rpt_temp();
   root.printTo(Serial);
   Serial.println();
   rain_cnt = 0;
@@ -48,7 +48,7 @@ float rpt_temp() {
 //############################################
 // we get 3 interupt counts per round - returns intantaneous mph
 float rpt_velocity() {
-  float cur_vel = ( ((vel / 3.000 ) * 1.492) );/// (rpt_period/1000.000) );
+  float cur_vel = ( ((vel / 3.000 ) * 1.492) / (rpt_period/1000.000) );/// (rpt_period/1000.000) );
   return cur_vel;
 }
 //############################################
