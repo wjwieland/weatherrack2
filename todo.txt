@@ -1,0 +1,6 @@
+2015-12-28
+		Change arduino code to only send data if there is a significant change in values.  This will save on storage space on the PRi and battery on the arduino. will need to extrapolate data on user interface!  
+		
+		Set up lipo charger so that it does not flutter on and off when solar panel is not producing much power.  Need a schotkey diode and a few capacitors for this.  Also need to pick up a few 3.7v batteries from the hobby shop.
+		
+		Need to adjust XBees so the endpoint runs in sleep mode and broadcasts under high power.  
