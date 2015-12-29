@@ -12,7 +12,7 @@ int get_dir() {
 //####################################################
 //returns inches
 float get_rain() {
-  return (rain_cnt * per_tip) / 3 ;
+  return (rain_cnt * per_tip) / 2 ;
 }
 //####################################################
 void make_json() {
