@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Weather Rack 2 by wjwieland</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/wjwieland/weatherrack2">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/wjwieland/weatherrack2/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/wjwieland/weatherrack2/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Weather Rack 2</h1>
+          <p>Project for WeatherRack from SwitchDoc labs.  Not using the WeatherPiArduino!</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/wjwieland">wjwieland</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a id="weather-rack-2" class="anchor" href="#weather-rack-2" aria-hidden="true"><span class="octicon octicon-link"></span></a>Weather Rack 2</h1>
+
+<p>This project was taken on to re-familiarize myself with everything from soldering to basic circuit design and build.  It is a lessons learned (or relearned) project.  The ultimate goal of the project is to measure wind availability on our farm to see if it is what the ROI of installing a wind generator might be, how much of a wind generator would be worth the investment if it is worht it, and generally to have some data about wind and sun in our area.  </p>
+
+<p>Speaking of the sun: I intend to add light monitoring to this project as well to determine the potential ROI of installing solar on our south facing building roof areas.  We have plenty of it!</p>
+
+<h3>
+<a id="the-hardware" class="anchor" href="#the-hardware" aria-hidden="true"><span class="octicon octicon-link"></span></a>The hardware:</h3>
+
+<ul>
+<li>SwithDocs Weather Rack hardware was chosen simply because it is the only thing out there that does not cost hundreds of dollars.  It is not the most robust thing, but I believe that if properly mounted and cared for will do the job.  I chose not to include the WeatherPi module and instead run the outputs from each measurement device directly to the Arduino.  Figuring out the actual signals from the measurement devices is not as simple as it might seem.  The docs assume that the WeatherPI will be used and are misleading if it is not. </li>
+<li>I started with an Arduino Uno just to get things going, but it seemed a waste of IO and power.  I choose the Pro Trinket for size and power consumption reasons.  It is a nice little unit, fairly robust as proven by my late night "oops! that wire does not go there!" moments and my shaky hands.  Combined with a battery backup allowing me to use 5 volts to power the 3v 12M without having to mess with voltage converter stuff. 
+*A 6V 2W solar panel is being used along with a lipo solar charging module from Adafuit.  I cut the jack off of the solar panel and soldered it around the jack on the charge controller and jumped the charge rate by soldering in a 1k ohm resistor.  The Learning note on Adafruit site show how to keep flutter out of the system by adding a voltage divider, schotkey diode and a large capacitor.            Pretty simple.<br>
+</li>
+<li>I mounted the Trinket and associate wiring and components on a little half proto board from Radio Shack.  Mistake!  The proto board is less expensive than those sold by Adafruit and others, but does not have plated through holes, making it less than ideal for this kind of project.  Future projects will start with proto boards that have plated through holes.  Also, bus bars are nice, but I prefer the 10 to 10 mil straps between mounting holes so I can easily cut the bus bars down to size if needed.
+*XBee I chose the XBee because a friend of mine gave me some of them left over from an earlier project he was on.  I have both Pro S2 and S1 models.  I chose the S1 because they are simple to set up.  This project is power/battery sensitive, so I still need to play around with the sleep mode of the end point and a bit of programming to ensure I only send data back to the RPi(more on RPi later) when there is something changed.  This will reduce power used by Xbee as well as data storage requirements.  I would like to play around with the Huzzah as well, but that will have to come later. I have two of them, but want to finish this up, so will continue on with the XBee.</li>
+<li>RPi
+Amazing little fellows!  I have the RPi2 and the RPi B+. The2 is worth the extra couple of bucks for speed alone.  I wish that the Arduino IDE was kept more up to date for this platform.  It would make sense to have a development lag, but what makes more sense to to have an robustly supported IDE on the RPi.<br>
+The RPi/Arduino combination makes a lot of sense to me as it offers flexibility that integrated units like the Yun don't.  At the same time, I like that real world integration is handled by a micro-controller which is isolated from the processing unit.  It offers a redundancy and robustness and separation of functionality that I like.  All good and well to use the GPIO on the RPi I guess, but it is really not what a processing unit should be use for.  The micro controller does it's thing well, the processing unit(RPi) does its thing well.  I like it that way.</li>
+</ul>
+
+<hr>
+
+<h3>
+<a id="ongoing" class="anchor" href="#ongoing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Ongoing</h3>
+
+<p>A few more steps as noted in the todo.txt file in the Github project...  </p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
