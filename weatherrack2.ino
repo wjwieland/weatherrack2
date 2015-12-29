@@ -44,7 +44,8 @@ DeviceAddress thermometer = { 0x28, 0xC1, 0xD1, 0xDC, 0x06, 0x00, 0x00, 0xE7 };
 volatile unsigned long int vel = 0;
 volatile unsigned long int rain_cnt = 0;
 const float per_tip = 0.0110;
-int rpt_period = 3000.000;
+int rpt_ms = 15000;
+int rpt_sec = rpt_ms / 1000;
 boolean debugger = false;
 
 //3.3V
@@ -74,7 +75,7 @@ void velocity(void);
 void rain(void);
 void dbug();
 
-TimerObject *report = new TimerObject(rpt_period);
+TimerObject *report = new TimerObject(rpt_ms);
 TimerObject *debug  = new TimerObject(1000);
 //############################################3
 void setup() {
