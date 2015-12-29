@@ -4,3 +4,10 @@
 		Set up lipo charger so that it does not flutter on and off when solar panel is not producing much power.  Need a schotkey diode and a few capacitors for this.  Also need to pick up a few 3.7v batteries from the hobby shop.
 		
 		Need to adjust XBees so the endpoint runs in sleep mode and broadcasts under high power.  
+
+2015-12-29	1. still need to finish up the charger to protect from flutter
+ 		2. add routine to only send from arduino if data has changed 
+		   in order to reduce data storage requirements and power used
+		   by the XBee.
+		3. Adjust XBee endpoint to go into sleep mode cyclic4 mode.
+		4. Calibrate both the rain gage and the anemometer.
