@@ -1,0 +1,3 @@
+CREATE TABLE rain (eid integer primary key autoincrement, ts text, amount real, rate real);
+CREATE TABLE wind (eid integer primary key autoincrement, ts text, velocity real, direction integer);
+CREATE TABLE temp (eid integer primary key autoincrement, ts text, temperature real);
