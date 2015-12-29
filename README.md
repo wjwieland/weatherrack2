@@ -14,4 +14,4 @@ Solar Panel
 Li|Ion/LiPoly Backup
 Li|Ion/LiPoly charger
 
-
+Site page at http://wjwieland.github.io/weatherrack2/
