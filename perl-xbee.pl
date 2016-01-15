@@ -7,6 +7,8 @@ use DateTime;
 my $dbfile = "/home/wjw/weather.sql3";
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile" ,"","");
 my $sth;
+my %hash;    #current vals incoming
+my %last;    #last read values
 my $port = Device::SerialPort->new("/dev/ttyAMA0");
 # 19200, 81N on the USB ftdi driver
 $port->baudrate(115200); # you may change this value
@@ -34,13 +36,12 @@ while (1) { # and all the rest of the gremlins as they come in one piece
 while (1) {
     # Poll to see if any data is coming in
     my $char = $port->lookfor();
-    my %hash;
     my $timestamp = uts_to_iso(time());
     my $q;
     # If we get data, then print it
     # Send a number to the arduino
     if ($char) {
-        print " $char \n";
+        #print " $char \n";
 		my $line = $char;
 		chomp($line);
 		$line =~ s/\{//g;
@@ -50,24 +51,32 @@ while (1) {
 		my @lines = split(/\,/, $line);
 		foreach my $field (@lines) {
 	   		($key, $val) = split(/\:/, $field);
-	   		print "key " . $key . " = " . $val . "\n";
+#	   		print "key " . $key . " = " . $val . "\n";
 	   		$hash{$key} = $val;
 		}
-		foreach (sort keys %hash) {
-			if ($_ =~ m/wv/) {
+		foreach (sort keys %hash) {	
+			next if $hash{$_} == $last{$_};  #don't store values that have not changed
+			if ($_ =~ m/wv|wd/) {
 	    		$q = qq(insert into wind (ts, velocity, direction) values ( \'$timestamp\', $hash{$_}, $hash{'wd'})); 
+				$sth=$dbh->prepare($q);
+				$sth->execute;
 			}
-  	   		next if $_ =~ /wd/;
-	   		if ($_ =~ /ra/) { 
+  
+	   		if ($_ =~ /ra|rr/) { 
 				$q = qq(insert into rain (ts, amount, rate) values ( \'$timestamp\', $hash{'ra'}, $hash{'rr'})); 
+				print $q;
+				$sth=$dbh->prepare($q);
+				$sth->execute;
 			}
-	   		next if $_ =~ m/rr/;
+
         	if ($_ =~ /tF/) { 
 				$q = qq(insert into temp ( ts, temperature ) values ( \'$timestamp\', $hash{'tF'})); 
+				$sth=$dbh->prepare($q);
+				$sth->execute;
 			}
-			$sth=$dbh->prepare($q);
-			$sth->execute;
     	}
+		%last = %hash;  #copy current to last hash for next compare
+#		print $q;
 	} 
     	# Uncomment the following lines, for slower reading,
     	# but lower CPU usage, and to avoid
@@ -81,5 +90,5 @@ while (1) {
 sub uts_to_iso {
 	my $uts = shift;
 	my $date = DateTime->from_epoch(epoch => $uts, time_zone => 'UTC');
-	return $date->ymd().'T'.$date->hms().'z';
+	return $date->ymd().'T'.$date->hms().'Z';
 }

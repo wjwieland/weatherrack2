@@ -50,7 +50,7 @@ while (1) {
 		my @lines = split(/\,/, $line);
 		foreach my $field (@lines) {
 	   		($key, $val) = split(/\:/, $field);
-	   		print "key " . $key . " = " . $val . "\n";
+#	   		print "key " . $key . " = " . $val . "\n";
 	   		$hash{$key} = $val;
 		}
 		foreach (sort keys %hash) {
