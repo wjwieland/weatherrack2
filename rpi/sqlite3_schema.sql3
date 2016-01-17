@@ -98,12 +98,12 @@ CREATE VIEW daily_wind as select avg(wind.velocity) from wind where wind.ts > (s
 --
 -- Exporting view definitions for daily_wind_dir
 --
-CREATE VIEW daily_wind_dir as select wind.direction from wind where wind.ts > (select datetime('now', '-1 day'));
+CREATE VIEW daily_wind_dir as select wind.ts, wind.direction from wind where wind.ts > (select datetime('now', '-1 day'));
 --
 -- Exporting view definitions for hourly_wind
 --
-CREATE VIEW hourly_wind as select wind.velocity from wind where wind.ts > (select datetime('now', '-1 hour'));
+CREATE VIEW hourly_wind as select wind.ts, wind.velocity from wind where wind.ts > (select datetime('now', '-1 hour'));
 --
 -- Exporting view definitions for hourly_wind_dir
 --
-CREATE VIEW hourly_wind_dir as select wind.direction from wind where wind.ts > (select datetime('now', '-1 hour'));
+CREATE VIEW hourly_wind_dir as select wind.ts, wind.direction from wind where wind.ts > (select datetime('now', '-1 hour'));
