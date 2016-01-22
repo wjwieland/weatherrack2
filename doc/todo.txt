@@ -1,13 +1,25 @@
 2015-12-28
-		Change arduino code to only send data if there is a significant change in values.  This will save on storage space on the PRi and battery on the arduino. will need to extrapolate data on user interface!  
-		
-		Set up lipo charger so that it does not flutter on and off when solar panel is not producing much power.  Need a schotkey diode and a few capacitors for this.  Also need to pick up a few 3.7v batteries from the hobby shop.
-		
+		Change arduino code to only send data if there is a significant change in values.  
+		This will save on storage space on the PRi and battery on the arduino. 
+		Will need to extrapolate data on user interface!  
+		Set up lipo charger so that it does not flutter on and off when solar panel is not producing much power.  
+		Need a schotkey diode and a few capacitors for this.  Also need to pick up a few 3.7v batteries from the hobby shop.
 		Need to adjust XBees so the endpoint runs in sleep mode and broadcasts under high power.  
 
-2015-12-29	1. still need to finish up the charger to protect from flutter
+2015-12-29	
+		1. still need to finish up the charger to protect from flutter
  		2. add routine to only send from arduino if data has changed 
 		   in order to reduce data storage requirements and power used
 		   by the XBee.
 		3. Adjust XBee endpoint to go into sleep mode cyclic4 mode.
 		4. Calibrate both the rain gage and the anemometer.
+
+2016-01-21
+		Arduino sends data every 15 seconds.  Chose not to adjust arduino code to save on sending(yet).
+		Perl code on RPI determines if change in value and stores if so, discards if not(space saving)
+		Still need to calibrate
+		Still need to modify the power source, charge controller and solar panel
+		Will need larger capacity batteries
+		Wind direction now stored in a lookup table is sqlite.  Arduino delivers an integer, SQL correlates.
+		Still need to play with XBee node to conserve power.
+		

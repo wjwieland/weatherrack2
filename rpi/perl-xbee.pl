@@ -9,7 +9,7 @@ my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile" ,"","");
 my $sth;
 my %last;    #last read values
 my $port = Device::SerialPort->new("/dev/ttyAMA0");
-my $debug = 0;	#set to 1 if debug print statements are to be displayed
+my $debug = 1;	#set to 1 if debug print statements are to be displayed
 # 19200, 81N on the USB ftdi driver
 $port->baudrate(115200); # you may change this value
 $port->databits(8); # but not this and the two following
@@ -56,32 +56,33 @@ while (1) {
 	   		$hash{$key} = $val;
 		}
 		foreach (sort keys %hash) {	
-			next if $hash{$_} == $last{$_};  #don't store values that have not changed
-			if ($_ =~ m/wv/) {
-	    		$q = qq(insert into wind (ts, velocity, direction) values ( \'$timestamp\', $hash{$_}, $hash{'wd'})); 
+			next if $_ =~ m/rr/;              #rain rate gets filled in when there is rain amount(ra)
+			if (($_ =~ m/wv/) && ($hash{$_} != $last{$_})) {
+	    		$q = qq(insert into speed (ts, speed) values ( '$timestamp', $hash{$_})); 
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			}
 
- 			if ($_ =~ m/wd/) {
-	    		$q = qq(insert into wind (ts, velocity, direction) values ( \'$timestamp\', $hash{'wv'}, $hash{$_})); 
+ 			if (($_ =~ m/wd/) && ($hash{$_} != $last{$_})) {
+	    		$q = qq(insert into direction (ts, direction) values ( '$timestamp', $hash{$_})); 
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			} 
 
-	   		if ($_ =~ /ra|rr/) { 
-				$q = qq(insert into rain (ts, amount, rate) values ( \'$timestamp\', $hash{'ra'}, $hash{'rr'})); 
+	   		if (($_ =~ /ra/) && ($hash{$_} > 0)) { 
+				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'ra'}, $hash{'rr'})); 
 				print $q;
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			}
 
-        	if ($_ =~ /tF/) { 
-				$q = qq(insert into temp ( ts, temperature ) values ( \'$timestamp\', $hash{'tF'})); 
+        	if (($_ =~ /tF/) && ($hash{$_} != $last{$_})){ 
+				$q = qq(insert into temp ( ts, temperature ) values ( '$timestamp', $hash{'tF'})); 
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			}
 			if ($debug == 1) {print "$q\n\n";}
+			$q = '';	#clear the query string so debugging is not confusing.
     	}
 		%last = %hash;  #copy current to last hash for next compare
 	} 
@@ -96,6 +97,6 @@ while (1) {
 
 sub uts_to_iso {
 	my $uts = shift;
-	my $date = DateTime->from_epoch(epoch => $uts, time_zone => 'UTC');
+	my $date = DateTime->from_epoch(epoch => $uts, time_zone => 'America/Chicago');
 	return $date->ymd().'T'.$date->hms().'Z';
 }

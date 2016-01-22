@@ -1,109 +1,23 @@
---
--- Database export made by aSQLiteManager
---
---
--- Exporting table definitions for rain
---
+BEGIN TRANSACTION;
+CREATE TABLE temp (eid integer primary key autoincrement, ts text, temperature real);
+CREATE TABLE speed (eid integer primary key autoincrement, ts text, speed real);
 CREATE TABLE rain (eid integer primary key autoincrement, ts text, amount real, rate real);
---
--- Exporting table definitions for aSQLiteManager
---
-CREATE TABLE aSQLiteManager (_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, sql TEXT NOT NULL UNIQUE);
---
--- Exporting table definitions for wind
---
-CREATE TABLE wind (eid integer primary key autoincrement, ts text, velocity real, direction integer);
---
--- Exporting table definitions for temp
---
-CREATE TABLE temp (eid integer primary key autoincrement, ts text, temperature real);
---
--- Exporting data for  rain
---
---
--- Exporting data for  aSQLiteManager
---
-insert into aSQLiteManager values (1, 'delete from aSQLiteManager where 1=1');
-insert into aSQLiteManager values (2, 'drop table aSQLiteManager');
-insert into aSQLiteManager values (3, 'CREATE TABLE rain (eid integer primary key autoincrement, ts text, amount real, rate real);
-CREATE TABLE wind (eid integer primary key autoincrement, ts text, velocity real, direction integer);
-CREATE TABLE temp (eid integer primary key autoincrement, ts text, temperature real);
-create view hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 hour))
-create view daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 day))
-create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 hour))
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 day))');
-insert into aSQLiteManager values (4, 'CREATE TABLE wind (eid integer primary key autoincrement, ts text, velocity real, direction integer);
-CREATE TABLE temp (eid integer primary key autoincrement, ts text, temperature real);
-create view hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 hour));
-create view daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 day));
-create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 hour));
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 day));');
-insert into aSQLiteManager values (5, 'CREATE TABLE temp (eid integer primary key autoincrement, ts text, temperature real);
-create view hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 hour));
-create view daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 day));
-create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 hour));
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 day));');
-insert into aSQLiteManager values (6, 'create view hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 hour));
-create view daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 day));
-create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 hour));
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 day));');
-insert into aSQLiteManager values (7, 'create view hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 hour'));
-create view daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now,' '-1 day'));
-create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 hour'));
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 day'));');
-insert into aSQLiteManager values (8, 'create view daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now,' '-1 day'));
-create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 hour'));
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 day'));');
-insert into aSQLiteManager values (9, 'create view hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 hour'));
-create view daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime(now, -1 day));
-create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 hour));
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 day));');
-insert into aSQLiteManager values (10, 'create view daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 day'));
-create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 hour));
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 day));');
-insert into aSQLiteManager values (11, 'create view hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 hour'));
-create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime(now, -1 day));');
-insert into aSQLiteManager values (12, 'create view daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 day'));');
-insert into aSQLiteManager values (13, 'create view daily_wind as select avg(wind.speed) from wind where wind.ts > (select datetime('now', '-1 day'));');
-insert into aSQLiteManager values (14, 'create view daily_wind as select avg(wind.velocity) from wind where wind.ts > (select datetime('now', '-1 day'));');
-insert into aSQLiteManager values (15, 'create view daily_wind_dir as select wind.direction from wind where wind.ts > (select datetime('now', '-1 day'));');
-insert into aSQLiteManager values (16, 'create view hourly_wind as select wind.velocity from wind where wind.ts > (select datetime('now', '-1 hour'));');
-insert into aSQLiteManager values (17, 'create view hourly_wind_dir as select wind.direction from wind where wind.ts > (select datetime('now', '-1 hour'));');
---
--- Exporting data for  wind
---
---
--- Exporting data for  temp
---
---
--- Exporting view definitions for hourly_rain
---
-CREATE VIEW hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 hour'));
---
--- Exporting view definitions for daily_rain
---
-CREATE VIEW daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 day'));
---
--- Exporting view definitions for hourly_temp
---
+CREATE TABLE lookup (eid integer primary key autoincrement, degree integer, direction text);
+INSERT INTO `lookup` VALUES(1,0,'N');
+INSERT INTO `lookup` VALUES(2,90,'E');
+INSERT INTO `lookup` VALUES(3,180,'S');
+INSERT INTO `lookup` VALUES(4,270,'W');
+INSERT INTO `lookup` VALUES(5,45,'NE');
+INSERT INTO `lookup` VALUES(6,135,'SE');
+INSERT INTO `lookup` VALUES(7,225,'SW');
+INSERT INTO `lookup` VALUES(8,315,'NW');
+CREATE TABLE direction (eid integer primary key autoincrement, ts text, direction integer);
 CREATE VIEW hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 hour'));
---
--- Exporting view definitions for daily_temp
---
+CREATE VIEW hourly_speed as select speed.ts, speed.speed from speed where speed.ts >= (select datetime('now', '-1 hour'));
+CREATE VIEW hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 hour'));
+CREATE VIEW hourly_direction as select direction.ts, lookup.direction from direction join lookup on direction.direction = lookup.degree where direction.ts >= (select datetime('now', '-1 hour'));
 CREATE VIEW daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 day'));
---
--- Exporting view definitions for daily_wind
---
-CREATE VIEW daily_wind as select avg(wind.velocity) from wind where wind.ts > (select datetime('now', '-1 day'));
---
--- Exporting view definitions for daily_wind_dir
---
-CREATE VIEW daily_wind_dir as select wind.ts, wind.direction from wind where wind.ts > (select datetime('now', '-1 day'));
---
--- Exporting view definitions for hourly_wind
---
-CREATE VIEW hourly_wind as select wind.ts, wind.velocity from wind where wind.ts > (select datetime('now', '-1 hour'));
---
--- Exporting view definitions for hourly_wind_dir
---
-CREATE VIEW hourly_wind_dir as select wind.ts, wind.direction from wind where wind.ts > (select datetime('now', '-1 hour'));
+CREATE VIEW daily_speed as select speed.ts, speed.speed from speed where speed.ts >= (select datetime('now', '-1 day'));
+CREATE VIEW daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 day'));
+CREATE VIEW daily_direction as select direction.ts, lookup.direction from direction join lookup on direction.direction = lookup.degree where direction.ts >= (select datetime('now', '-1 day'));
+COMMIT;
