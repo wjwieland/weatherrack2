@@ -47,8 +47,13 @@ float rpt_temp() {
 }
 //############################################
 // we get 3 interupt counts per round - returns intantaneous mph
+// The above assumption is incorrect. The pertinent relationship
+// is expressed as switch closes each second. Each swclose/sec is
+// equal to 1.492 mpg. So the number of switch closes/revolution
+// does not matter. Modified the following to reflect this. Note
+// that the rpt_sec variable impacts resolution of measurements!
 float rpt_velocity() {
-  float cur_vel = ( ((vel / 3.000 ) * 1.492) / rpt_sec );
+  float cur_vel = ( (vel * 1.492) / rpt_sec );
   return cur_vel;
 }
 //############################################
