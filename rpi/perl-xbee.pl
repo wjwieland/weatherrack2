@@ -9,7 +9,7 @@ my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile" ,"","");
 my $sth;
 my %last;    #last read values
 my $port = Device::SerialPort->new("/dev/ttyAMA0");
-my $debug = 1;	#set to 1 if debug print statements are to be displayed
+my $debug = 0;	#set to 1 if debug print statements are to be displayed
 # 19200, 81N on the USB ftdi driver
 $port->baudrate(115200); # you may change this value
 $port->databits(8); # but not this and the two following
@@ -52,7 +52,7 @@ while (1) {
 		my @lines = split(/\,/, $line);
 		foreach my $field (@lines) {
 	   		($key, $val) = split(/\:/, $field);
-	   		if ($debug == 1) {print "key " . $key . " = " . $val . "\n";}
+	   		if ($debug == 1) {print $timestamp . ": key " . $key . " = " . $val . "\n";}
 	   		$hash{$key} = $val;
 		}
 		foreach (sort keys %hash) {	
@@ -76,8 +76,8 @@ while (1) {
 				$sth->execute;
 			}
 
-        	if (($_ =~ /tF/) && ($hash{$_} != $last{$_})){ 
-				$q = qq(insert into temp ( ts, temperature ) values ( '$timestamp', $hash{'tF'})); 
+        	if (($_ =~ /tF/) && ($hash{$_} - $last{$_} >= 1.0 )){ 
+				$q = qq(insert into temp (ts, temperature) values ( '$timestamp', $hash{'tF'})); 
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			}
