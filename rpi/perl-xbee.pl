@@ -9,7 +9,7 @@ my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile" ,"","");
 my $sth;
 my %last;    #last read values
 my $port = Device::SerialPort->new("/dev/ttyAMA0");
-my $debug = 0;	#set to 1 if debug print statements are to be displayed
+my $debug = 1;	#set to 1 if debug print statements are to be displayed
 # 19200, 81N on the USB ftdi driver
 $port->baudrate(115200); # you may change this value
 $port->databits(8); # but not this and the two following
@@ -42,7 +42,7 @@ while (1) {
     # If we get data, then print it
     # Send a number to the arduino
     if ($char) {
-        #print " $char \n";
+        if ($debug == 1) {print " $char \n";}
 		my $line = $char;
 		chomp($line);
 		$line =~ s/\{//g;
