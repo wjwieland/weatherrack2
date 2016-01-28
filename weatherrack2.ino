@@ -47,7 +47,7 @@ const float per_tip = 0.0110;
 int rpt_ms = 15000;
 int rpt_sec = rpt_ms / 1000;
 boolean debugger = false;
-
+int battVolts;
 //3.3V
 float volts[8] = {
   3.05,
@@ -74,7 +74,7 @@ int deg[8] = {
 void velocity(void);
 void rain(void);
 void dbug();
-
+int getBandgap(void);
 TimerObject *report = new TimerObject(rpt_ms);
 TimerObject *debug  = new TimerObject(1000);
 //############################################3
@@ -118,6 +118,8 @@ void dbug() {
   Serial.print("A0 value ");
   Serial.println(analogRead(A0));
   Serial.println("Debug End");
+  Serial.print("Oper. Voltage ");
+  Serial.println(getBandgap());
   Serial.println();
 }
 //############################################
