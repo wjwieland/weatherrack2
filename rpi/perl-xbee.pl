@@ -81,9 +81,13 @@ while (1) {
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			}
+			if ($_ =~ /ov/ ) {
+				$q = qq(insert into ov (ts, volts) values ('$timestamp', $hash{'ov'}));
+			}
+			
 			if ($debug == 1) {print "$q\n\n";}
-			$q = '';	#clear the query string so debugging is not confusing.
-    	}
+				$q = '';	#clear the query string so debugging is not confusing.
+    		}
 		%last = %hash;  #copy current to last hash for next compare
 	} 
     	# Uncomment the following lines, for slower reading,
