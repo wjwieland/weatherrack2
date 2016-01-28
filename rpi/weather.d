@@ -1,5 +1,6 @@
+#!/bin/sh
 # Change the next 3 lines to suit where you install your script and what you want to call it
-DIR=/home/wjw/bin
+DIR=/home/wjw/Arduino/Sketchbook/weatherrack2/rpi
 DAEMON=$DIR/perl-xbee.pl
 DAEMON_NAME=weather
 
@@ -8,22 +9,23 @@ DAEMON_OPTS=""
 
 # This next line determines what user the script runs as.
 # Root generally not recommended but necessary if you are using the Raspberry Pi GPIO from Python.
-DAEMON_USER=wjw
+DAEMON_USER=root
 
 # The process ID of the script when it runs is stored here:
 PIDFILE=/var/run/$DAEMON_NAME.pid
 
-. /lib/lsb/init-functions
+#. /lib/lsb/init-functions
 
 do_start () {
-    log_daemon_msg "Starting system $DAEMON_NAME daemon"
+#    log_daemon_msg "Starting system $DAEMON_NAME daemon"
     start-stop-daemon --start --background --pidfile $PIDFILE --make-pidfile --user $DAEMON_USER --chuid $DAEMON_USER --startas $DAEMON -- $DAEMON_OPTS
-    log_end_msg $?
+#    log_end_msg $?
 }
 do_stop () {
-    log_daemon_msg "Stopping system $DAEMON_NAME daemon"
+#    log_daemon_msg "Stopping system $DAEMON_NAME daemon"
     start-stop-daemon --stop --pidfile $PIDFILE --retry 10
-    log_end_msg $?
+    rm $PIDFILE
+#    log_end_msg $?
 }
 
 case "$1" in
@@ -38,7 +40,8 @@ case "$1" in
         ;;
 
     status)
-        status_of_proc "$DAEMON_NAME" "$DAEMON" && exit 0 || exit $?
+        #status_of_proc "$DAEMON_NAME" "$DAEMON" && exit 0 || exit $?
+        pgrep -ax perl-xbee.pl
         ;;
 
     *)

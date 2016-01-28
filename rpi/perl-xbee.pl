@@ -42,7 +42,7 @@ while (1) {
     # If we get data, then print it
     # Send a number to the arduino
     if ($char) {
-        #print " $char \n";
+        if ($debug == 1) {print " $char \n";}
 		my $line = $char;
 		chomp($line);
 		$line =~ s/\{//g;
@@ -52,7 +52,7 @@ while (1) {
 		my @lines = split(/\,/, $line);
 		foreach my $field (@lines) {
 	   		($key, $val) = split(/\:/, $field);
-	   		if ($debug == 1) {print "key " . $key . " = " . $val . "\n";}
+	   		if ($debug == 1) {print $timestamp . ": key " . $key . " = " . $val . "\n";}
 	   		$hash{$key} = $val;
 		}
 		foreach (sort keys %hash) {	
@@ -76,14 +76,18 @@ while (1) {
 				$sth->execute;
 			}
 
-        	if (($_ =~ /tF/) && ($hash{$_} != $last{$_})){ 
-				$q = qq(insert into temp ( ts, temperature ) values ( '$timestamp', $hash{'tF'})); 
+        	if (($_ =~ /tF/) && ($hash{$_} - $last{$_} >= 1.0 )){ 
+				$q = qq(insert into temp (ts, temperature) values ( '$timestamp', $hash{'tF'})); 
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			}
+			if ($_ =~ /ov/ ) {
+				$q = qq(insert into ov (ts, volts) values ('$timestamp', $hash{'ov'}));
+			}
+			
 			if ($debug == 1) {print "$q\n\n";}
-			$q = '';	#clear the query string so debugging is not confusing.
-    	}
+				$q = '';	#clear the query string so debugging is not confusing.
+    		}
 		%last = %hash;  #copy current to last hash for next compare
 	} 
     	# Uncomment the following lines, for slower reading,
