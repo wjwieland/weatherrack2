@@ -1,7 +1,17 @@
 BEGIN TRANSACTION;
+
 CREATE TABLE temp (eid integer primary key autoincrement, ts text, temperature real);
+
 CREATE TABLE speed (eid integer primary key autoincrement, ts text, speed real);
+
 CREATE TABLE rain (eid integer primary key autoincrement, ts text, amount real, rate real);
+
+CREATE TABLE `op_volt` (
+	`eid`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`ts`	TEXT NOT NULL,
+	`volts`	REAL NOT NULL
+);
+
 CREATE TABLE lookup (eid integer primary key autoincrement, degree integer, direction text);
 INSERT INTO `lookup` VALUES(1,0,'N');
 INSERT INTO `lookup` VALUES(2,90,'E');
@@ -11,13 +21,53 @@ INSERT INTO `lookup` VALUES(5,45,'NE');
 INSERT INTO `lookup` VALUES(6,135,'SE');
 INSERT INTO `lookup` VALUES(7,225,'SW');
 INSERT INTO `lookup` VALUES(8,315,'NW');
+
 CREATE TABLE direction (eid integer primary key autoincrement, ts text, direction integer);
-CREATE VIEW hourly_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 hour'));
-CREATE VIEW hourly_speed as select speed.ts, speed.speed from speed where speed.ts >= (select datetime('now', '-1 hour'));
-CREATE VIEW hourly_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 hour'));
-CREATE VIEW hourly_direction as select direction.ts, lookup.direction from direction join lookup on direction.direction = lookup.degree where direction.ts >= (select datetime('now', '-1 hour'));
-CREATE VIEW daily_temp as select temp.ts, temp.temperature from temp where temp.ts > (select datetime('now', '-1 day'));
-CREATE VIEW daily_speed as select speed.ts, speed.speed from speed where speed.ts >= (select datetime('now', '-1 day'));
-CREATE VIEW daily_rain as select rain.ts, rain.amount, rain.rate from rain where rain.ts > (select datetime('now', '-1 day'));
-CREATE VIEW daily_direction as select direction.ts, lookup.direction from direction join lookup on direction.direction = lookup.degree where direction.ts >= (select datetime('now', '-1 day'));
+
+CREATE VIEW hourly_wind as 
+select speed.ts, speed.speed, direction.direction, lookup.direction 
+from speed left outer join direction on direction.ts = speed.ts 
+left join lookup on direction.direction = lookup.degree 
+where speed.ts >= (select datetime('now', '-1 hour'));
+
+CREATE VIEW hourly_temp as 
+select temp.ts, temp.temperature 
+from temp 
+where temp.ts > (select datetime('now', '-1 hour'));
+
+CREATE VIEW hourly_speed as 
+select speed.ts, speed.speed 
+from speed 
+where speed.ts >= (select datetime('now', '-1 hour'));
+
+CREATE VIEW hourly_rain as 
+select rain.ts, rain.amount, rain.rate 
+from rain 
+where rain.ts > (select datetime('now', '-1 hour'));
+
+CREATE VIEW hourly_direction as 
+select direction.ts, lookup.direction 
+from direction join lookup on direction.direction = lookup.degree 
+where direction.ts >= (select datetime('now', '-1 hour'));
+
+CREATE VIEW daily_temp as 
+select temp.ts, temp.temperature 
+from temp 
+where temp.ts > (select datetime('now', '-1 day'));
+
+CREATE VIEW daily_speed as 
+select speed.ts, speed.speed 
+from speed 
+where speed.ts >= (select datetime('now', '-1 day'));
+
+CREATE VIEW daily_rain as 
+select rain.ts, rain.amount, rain.rate 
+from rain 
+where rain.ts > (select datetime('now', '-1 day'));
+
+CREATE VIEW daily_direction as 
+select direction.ts, lookup.direction 
+from direction join lookup on direction.direction = lookup.degree 
+where direction.ts >= (select datetime('now', '-1 day'));
+
 COMMIT;
