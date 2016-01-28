@@ -23,3 +23,10 @@
 		Wind direction now stored in a lookup table is sqlite.  Arduino delivers an integer, SQL correlates.
 		Still need to play with XBee node to conserve power.
 		
+2016-01-28
+		Still need to get the solar panel in shape with schottkey diode at large capacitor.  Right now it
+		kills the transmission power on the xbee if the solar panel is fluctuating.  Probably going to need
+		either a bigger battery or a couple more in parallel to keep this going untill it can recharge.  Cold
+		weather definately has a impact on the LiPo batteries.  Fully charded they can make it about 4 - 6 
+		hours right now.  This could be helped by learning how to get the xbee node to sleep between sends, 
+		which I will have to do I think.
