@@ -1,54 +1,45 @@
 #!/usr/bin/perl
-# Set up the serial port
 use Device::SerialPort;
 use DBI;
 use Switch;
 use DateTime;
+use Device::XBee::API;
+use strict;
+use warnings;
+
 my $dbfile = "/home/wjw/weather.sql3";
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile" ,"","");
 my $sth;
 my %last;    #last read values
-my $port = Device::SerialPort->new("/dev/ttyAMA0");
+my %hash;
+my ($key,$val,%rx,$q,$cnt);
+# Set up the serial port
+my $dev = Device::SerialPort->new("/dev/ttyUSB0");
 my $debug = 1;	#set to 1 if debug print statements are to be displayed
 # 19200, 81N on the USB ftdi driver
-$port->baudrate(115200); # you may change this value
-$port->databits(8); # but not this and the two following
-$port->parity("none");
-$port->stopbits(1);
- 
-# now catch gremlins at start
-my $tEnd = time()+2; # 2 seconds in future
-while (time()< $tEnd) { # end latest after 2 seconds
-  my $c = $port->lookfor(); # char or nothing
-  next if $c eq ""; # restart if noting
-  # print $c; # uncomment if you want to see the gremlin
-  last;
-}
-while (1) { # and all the rest of the gremlins as they come in one piece
-  my $c = $port->lookfor(); # get the next one
-  last if $c eq ""; # or we're done
-  # print $c; # uncomment if you want to see the gremlin
-}
+$dev->baudrate(115200); # you may change this value
+$dev->databits(8); # but not this and the two following
+$dev->parity("none");
+$dev->stopbits(1);
 
-
-#$port->write("Whatever you feel like sending");
+my $xb = Device::XBee::API->new( { fh => $dev, timeout => 20 } ) || die 'no xbee';
+if ($debug == 1) {warn 'got xbee';}
 
 while (1) {
     # Poll to see if any data is coming in
-	my %hash;    #current vals incoming
-    my $char = $port->lookfor();
-    my $timestamp = uts_to_iso(time());
-    my $q;
-    # If we get data, then print it
-    if ($char) {
-        if ($debug == 1) {print " $char \n";}
-		my $line = $char;
+	my $rx = $xb->rx();
+	if (defined $rx->{'data'}) {
+	    my $timestamp = uts_to_iso(time());
+		$cnt++;
+		my $line = $rx->{'data'};
 		chomp($line);
 		$line =~ s/\{//g;
 		$line =~ s/\}//g;
 		$line =~ s/\"//g;
 		$line =~ s/\n,//g;
+		$line =~ s/'\cM'//g;
 		my @lines = split(/\,/, $line);
+		$hash{'count'} = $cnt;
 		foreach my $field (@lines) {
 	   		($key, $val) = split(/\:/, $field);
 	   		if ($debug == 1) {
@@ -62,25 +53,25 @@ while (1) {
 		foreach (sort keys %hash) {	
 			next if $_ =~ m/rr/;              #rain rate gets filled in when there is rain amount(ra)
 			if (($_ =~ m/wv/) && ($hash{$_} != $last{$_})) {
-	    		$q = qq(insert into speed (ts, speed) values ( '$timestamp', $hash{$_})); 
+	   			$q = qq(insert into speed (ts, speed) values ( '$timestamp', $hash{$_})); 
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			}
 
- 			if (($_ =~ m/wd/) && ($hash{$_} != $last{$_})) {
-	    		$q = qq(insert into direction (ts, direction) values ( '$timestamp', $hash{$_})); 
+			if (($_ =~ m/wd/) && ($hash{$_} != $last{$_})) {
+    			$q = qq(insert into direction (ts, direction) values ( '$timestamp', $hash{$_})); 
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			} 
 
-	   		if (($_ =~ /ra/) && ($hash{$_} > 0)) { 
+   			if (($_ =~ /ra/) && ($hash{$_} > 0)) { 
 				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'ra'}, $hash{'rr'})); 
 				print $q;
 				$sth=$dbh->prepare($q);
 				$sth->execute;
 			}
 
-        	if (($_ =~ /tF/) && ($hash{$_} - $last{$_} >= 1.0 )) { 
+       		if (($_ =~ /tF/) && ($hash{$_} - $last{$_} >= 1.0 )) { 
 				$q = qq(insert into temp (ts, temperature) values ( '$timestamp', $hash{'tF'})); 
 				$sth=$dbh->prepare($q);
 				$sth->execute;
@@ -98,17 +89,11 @@ while (1) {
 				}
 			}
 			$q = '';	#clear the query string so debugging is not confusing.
-    	}
+   		}
 		%last = %hash;  #copy current to last hash for next compare
-	} 
-    	# Uncomment the following lines, for slower reading,
-    	# but lower CPU usage, and to avoid
-    	# buffer overflow due to sleep function.
- 
-    	$port->lookclear;
-    	sleep (1);
+#   		sleep (1);
+	}
 }
-
 
 sub uts_to_iso {
 	my $uts = shift;
