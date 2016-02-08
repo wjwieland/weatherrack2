@@ -1,6 +1,6 @@
 int get_dir() {
   float loval, hival;
-  float voltage = (analogRead(A0)) * (3.300 / 1024);
+  float voltage = (analogRead(pinDir)) * (3.300 / 1024);
   for (int a = 0; a < 8; a++) {
     loval = (volts[a]) - 0.1; 
     hival = (volts[a]) + 0.1;

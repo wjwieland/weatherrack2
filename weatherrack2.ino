@@ -44,7 +44,7 @@ DeviceAddress thermometer = { 0x28, 0xC1, 0xD1, 0xDC, 0x06, 0x00, 0x00, 0xE7 };
 volatile unsigned long int vel = 0;
 volatile unsigned long int rain_cnt = 0;
 const float per_tip = 0.0110;
-int rpt_ms = 15000;
+int rpt_ms = 5000;
 int rpt_sec = rpt_ms / 1000;
 boolean debugger = false;
 int battVolts;
@@ -76,14 +76,14 @@ void rain(void);
 void dbug();
 int getBandgap(void);
 TimerObject *report = new TimerObject(rpt_ms);
-TimerObject *debug  = new TimerObject(1000);
+TimerObject *debug  = new TimerObject(rpt_ms);
 //############################################3
 void setup() {
   Serial.begin(115200);
   pinMode(pinVel, INPUT_PULLUP);
   pinMode(pinRain, INPUT_PULLUP);
   pinMode(pinDir, INPUT);
-  pinMode(pinTmp, INPUT);
+  pinMode(pinTmp, INPUT_PULLUP);
 
   attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(pinVel), velocity, RISING);
   attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(pinRain), rain, RISING);
@@ -102,10 +102,10 @@ void setup() {
 }
 //#############################################
 void loop() {
-  report->Update();
   if (debugger == true) {
     debug->Update();
   }
+  report->Update();
 }
 //##########################################
 void dbug() {
@@ -115,12 +115,12 @@ void dbug() {
   Serial.println(vel);
   Serial.print("Rain Count ");
   Serial.println(rain_cnt);
-  Serial.print("A0 value ");
-  Serial.println(analogRead(A0));
-  Serial.println("Debug End");
+  Serial.print("pinDir value ");
+  Serial.println(analogRead(pinDir));
   Serial.print("Oper. Voltage ");
   Serial.println(getBandgap());
   Serial.println();
+  Serial.println("Debug End");
 }
 //############################################
 
