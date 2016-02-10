@@ -35,7 +35,7 @@
 #define pinRain 10
 #define pinTmp 5
 #define ONE_WIRE_BUS pinTmp
-#define pinLux A2
+#define pinLux A3
 #define pinDir A0
 
 OneWire oneWire(ONE_WIRE_BUS);
