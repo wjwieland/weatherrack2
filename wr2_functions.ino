@@ -10,6 +10,12 @@ int get_dir() {
   }
 }
 //####################################################
+//returns analog value from light sensor
+int getLux() {
+  return analogRead(pinLux);
+}
+
+//####################################################
 //returns inches
 float get_rain() {
   return (rain_cnt * per_tip) / 2 ;
@@ -24,6 +30,7 @@ void make_json() {
   root["rr"] = rpt_rain_rate();
   root["tF"] = rpt_temp();
   root["ov"] = getBandgap();
+  root["lux"] = getLux();
   root.printTo(Serial);
   Serial.println();
   rain_cnt = 0;
@@ -94,3 +101,6 @@ int getBandgap(void)  {    // Returns actual value of Vcc (x 100) {
      int results = (((InternalReferenceVoltage * 1024L) / ADC) + 5L) / 10L; // calculates for straight line value
      return results;
 }
+
+/**************************************************************************/
+

@@ -1,18 +1,24 @@
 #!/usr/bin/perl
+use Modern::Perl;
 use Device::SerialPort;
 use DBI;
 use Switch;
 use DateTime;
 use Device::XBee::API;
-use strict;
-use warnings;
 
 my $dbfile = "/home/wjw/weather.sql3";
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile" ,"","");
-my $sth;
-my %last;    #last read values
-my %hash;
-my ($key,$val,%rx,$q,$cnt);
+my ($key,$val,%rx,$q,$cnt,%last,%hash,$sth);
+%last = 
+    (
+        "wv"  => 0,
+        "wd"  => 0,
+        "ra"  => 0,
+        "rr"  => 0,
+		"lux" => 0,
+		"tF"  => 0,
+		"ov"  => 0
+    );
 # Set up the serial port
 my $dev = Device::SerialPort->new("/dev/ttyUSB0");
 my $debug = 1;	#set to 1 if debug print statements are to be displayed
@@ -21,6 +27,9 @@ $dev->baudrate(115200); # you may change this value
 $dev->databits(8); # but not this and the two following
 $dev->parity("none");
 $dev->stopbits(1);
+$dev->read_char_time( 0 );        # don't wait for each character
+$dev->read_const_time( 1000 );    # 1 second per unfulfilled "read" call
+
 
 my $xb = Device::XBee::API->new( { fh => $dev, timeout => 20 } ) || die 'no xbee';
 if ($debug == 1) {warn 'got xbee';}
@@ -28,22 +37,18 @@ if ($debug == 1) {warn 'got xbee';}
 while (1) {
     # Poll to see if any data is coming in
 	my $rx = $xb->rx();
+	$cnt++;	
 	if (defined $rx->{'data'}) {
 	    my $timestamp = uts_to_iso(time());
-		$cnt++;
 		my $line = $rx->{'data'};
 		chomp($line);
-		$line =~ s/\{//g;
-		$line =~ s/\}//g;
-		$line =~ s/\"//g;
-		$line =~ s/\n,//g;
-		$line =~ s/'\cM'//g;
+		$line =~ s/\{//g; $line =~ s/\}//g;	$line =~ s/\"//g; $line =~ s/\n,//g;
 		my @lines = split(/\,/, $line);
 		$hash{'count'} = $cnt;
 		foreach my $field (@lines) {
 	   		($key, $val) = split(/\:/, $field);
 	   		if ($debug == 1) {
-				print $timestamp . ": key " . $key . " = " . $val . "\n";
+				print $timestamp . ":$key . " = " . $val . "\n";
 			}
 	   		$hash{$key} = $val;
 		}
@@ -54,44 +59,43 @@ while (1) {
 			next if $_ =~ m/rr/;              #rain rate gets filled in when there is rain amount(ra)
 			if (($_ =~ m/wv/) && ($hash{$_} != $last{$_})) {
 	   			$q = qq(insert into speed (ts, speed) values ( '$timestamp', $hash{$_})); 
-				$sth=$dbh->prepare($q);
-				$sth->execute;
+				$dbh->do($q);
 			}
-
 			if (($_ =~ m/wd/) && ($hash{$_} != $last{$_})) {
     			$q = qq(insert into direction (ts, direction) values ( '$timestamp', $hash{$_})); 
-				$sth=$dbh->prepare($q);
-				$sth->execute;
+				$dbh->do($q);
 			} 
-
    			if (($_ =~ /ra/) && ($hash{$_} > 0)) { 
-				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'ra'}, $hash{'rr'})); 
-				print $q;
-				$sth=$dbh->prepare($q);
-				$sth->execute;
+				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'$_'}, $hash{'rr'})); 
+				$dbh->do($q);
 			}
-
-       		if (($_ =~ /tF/) && ($hash{$_} - $last{$_} >= 1.0 )) { 
+       		if ( ($_ =~ /tF/) && (abs($hash{$_} - $last{$_} >= 0.5  ) ) { 
 				$q = qq(insert into temp (ts, temperature) values ( '$timestamp', $hash{'tF'})); 
-				$sth=$dbh->prepare($q);
-				$sth->execute;
+				$dbh->do($q);
 			}
-
 			if ( ( $_ =~ /ov/i ) && ($hash{$_} != $last{$_} ) ) {
 				$q = qq(insert into op_volt (ts, volts) values ('$timestamp', $hash{'ov'}));
-				$sth=$dbh->prepare($q);
-				$sth->execute;
+				$dbh->do($q);
 			}
-			
+			if ( ($_ =~ /lux/i) && (abs($hash{$_} - $last{$_} ) > 5 ) ) {
+				$q = qq(insert into lux (ts, analog_val) values ('$timestamp', $hash{'lux'}));
+				$dbh->do($q);
+			}
 			if ($debug == 1) {
-				if ($q !~ m/""/) {
-					print "$q\n";
+				if (length $q > 1) {
+					print "Query is $q\n";
 				}
 			}
 			$q = '';	#clear the query string so debugging is not confusing.
-   		}
+   			}
 		%last = %hash;  #copy current to last hash for next compare
-#   		sleep (1);
+		}	
+	if ($debug == 1) {
+		if ($cnt >= 25) {
+			exit;
+		} else {
+			print "Count is $cnt\n";
+		}
 	}
 }
 

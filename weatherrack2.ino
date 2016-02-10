@@ -30,13 +30,14 @@
 #include <OneWire.h>
 #include <TimerObject.h>
 
-
 // choose a valid PinChangeInterrupt pin of your Arduino board
 #define pinVel 9
 #define pinRain 10
-#define pinDir A0
 #define pinTmp 5
 #define ONE_WIRE_BUS pinTmp
+#define pinLux A2
+#define pinDir A0
+
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 DeviceAddress thermometer = { 0x28, 0xC1, 0xD1, 0xDC, 0x06, 0x00, 0x00, 0xE7 };
@@ -44,10 +45,12 @@ DeviceAddress thermometer = { 0x28, 0xC1, 0xD1, 0xDC, 0x06, 0x00, 0x00, 0xE7 };
 volatile unsigned long int vel = 0;
 volatile unsigned long int rain_cnt = 0;
 const float per_tip = 0.0110;
-int rpt_ms = 30000;
+int rpt_ms = 15000;
 int rpt_sec = rpt_ms / 1000;
-boolean debugger = false;
+int analog_lux = 0;
 int battVolts;
+boolean debugger = false;
+
 //3.3V
 float volts[8] = {
   3.05,
@@ -75,6 +78,8 @@ void velocity(void);
 void rain(void);
 void dbug();
 int getBandgap(void);
+int getLux(void);
+void make_json();
 TimerObject *report = new TimerObject(rpt_ms);
 TimerObject *debug  = new TimerObject(rpt_ms);
 //############################################3
@@ -82,7 +87,6 @@ void setup() {
   Serial.begin(115200);
   pinMode(pinVel, INPUT_PULLUP);
   pinMode(pinRain, INPUT_PULLUP);
-  pinMode(pinDir, INPUT);
   pinMode(pinTmp, INPUT_PULLUP);
 
   attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(pinVel), velocity, RISING);
@@ -103,12 +107,14 @@ void setup() {
 //#############################################
 void loop() {
   if (debugger == true) {
+    rpt_ms = 5000;
     debug->Update();
   }
   report->Update();
 }
 //##########################################
 void dbug() {
+  Serial.println("");
   Serial.println();
   Serial.println("Debug Start");
   Serial.print("Velocity Count ");
@@ -119,6 +125,8 @@ void dbug() {
   Serial.println(analogRead(pinDir));
   Serial.print("Oper. Voltage ");
   Serial.println(getBandgap());
+  Serial.print("light reading ");
+  Serial.println(getLux());
   Serial.println();
   Serial.println("Debug End");
 }
