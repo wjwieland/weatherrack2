@@ -21,7 +21,8 @@ my ($key,$val,%rx,$q,$cnt,%last,%hash,$sth);
     );
 # Set up the serial port
 my $dev = Device::SerialPort->new("/dev/ttyUSB0");
-my $debug = 1;	#set to 1 if debug print statements are to be displayed
+my $debug = 0;	#set to 1 if debug print statements are to be displayed
+my $profile = 0; # set to '1' when running NYTProfile.  Limits run length...
 # 19200, 81N on the USB ftdi driver
 $dev->baudrate(115200); # you may change this value
 $dev->databits(8); # but not this and the two following
@@ -48,12 +49,12 @@ while (1) {
 		foreach my $field (@lines) {
 	   		($key, $val) = split(/\:/, $field);
 	   		if ($debug == 1) {
-				print $timestamp . ":$key . " = " . $val . "\n";
+				say "$timestamp $key  =  $val";
 			}
 	   		$hash{$key} = $val;
 		}
 		if ($debug == 1) {
-			print "\n";
+			say "\n";
 		}
 		foreach (sort keys %hash) {	
 			next if $_ =~ m/rr/;              #rain rate gets filled in when there is rain amount(ra)
@@ -69,7 +70,7 @@ while (1) {
 				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'$_'}, $hash{'rr'})); 
 				$dbh->do($q);
 			}
-       		if ( ($_ =~ /tF/) && (abs($hash{$_} - $last{$_} >= 0.5  ) ) { 
+       		if ( ($_ =~ /tF/) && (abs($hash{$_} - $last{$_}) >= 0.5 ) ) { 
 				$q = qq(insert into temp (ts, temperature) values ( '$timestamp', $hash{'tF'})); 
 				$dbh->do($q);
 			}
@@ -77,7 +78,7 @@ while (1) {
 				$q = qq(insert into op_volt (ts, volts) values ('$timestamp', $hash{'ov'}));
 				$dbh->do($q);
 			}
-			if ( ($_ =~ /lux/i) && (abs($hash{$_} - $last{$_} ) > 5 ) ) {
+			if ( ($_ =~ /lux/i) && (abs(($hash{$_} - $last{$_} )) > 5 ) ) {
 				$q = qq(insert into lux (ts, analog_val) values ('$timestamp', $hash{'lux'}));
 				$dbh->do($q);
 			}
@@ -90,7 +91,7 @@ while (1) {
    			}
 		%last = %hash;  #copy current to last hash for next compare
 		}	
-	if ($debug == 1) {
+	if ($profile == 1) {
 		if ($cnt >= 25) {
 			exit;
 		} else {
