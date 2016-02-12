@@ -62,7 +62,7 @@ while (1) {
 	   			$q = qq(insert into speed (ts, speed) values ( '$timestamp', $hash{$_})); 
 				$dbh->do($q);
 			}
-			if (($_ =~ m/wd/) && ($hash{$_} != $last{$_})) {
+			if (($_ =~ m/wd/) && ($hash{$_} != $last{$_}) && ($_ >= 0) ) {
     			$q = qq(insert into direction (ts, direction) values ( '$timestamp', $hash{$_})); 
 				$dbh->do($q);
 			} 
