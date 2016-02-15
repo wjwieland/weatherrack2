@@ -175,7 +175,7 @@ sub get_op_volts {
       type: "line",
       axisYType: "secondary",
       showInLegend: true,
-      legendText: "Operating Volts(mv)",
+      legendText: "Operating Volts(V)",
       valueFormatSting: "#,,.",
       dataPoints: [ ';
       print "$json ] },\n";
@@ -211,6 +211,8 @@ sub get_lux {
    $json =~ s/\,\n$//;
    print '{
       type: "line",
+      showInLegend: true,
+      legendText: "Light Intensity(V)",
       dataPoints: [ ';
    print "$json ] }\n";
 }

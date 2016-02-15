@@ -70,7 +70,7 @@ while (1) {
 				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'$_'}, $hash{'rr'})); 
 				$dbh->do($q);
 			}
-       		if ( ($_ =~ /tF/) && (abs($hash{$_} - $last{$_}) >= 0.5 ) ) { 
+       		if ( ($_ =~ /tF/) && (abs($hash{$_} - $last{$_}) >= 0.2 ) ) { 
 				$q = qq(insert into temp (ts, temperature) values ( '$timestamp', $hash{'tF'})); 
 				$dbh->do($q);
 			}
@@ -78,7 +78,7 @@ while (1) {
 				$q = qq(insert into op_volt (ts, volts) values ('$timestamp', $hash{'ov'}));
 				$dbh->do($q);
 			}
-			if ( ($_ =~ /lux/i) && (abs(($hash{$_} - $last{$_} )) > 5 ) ) {
+			if ( ($_ =~ /lux/i) && (abs(($hash{$_} - $last{$_} )) > 0.1 ) ) {
 				$q = qq(insert into lux (ts, analog_val) values ('$timestamp', $hash{'lux'}));
 				$dbh->do($q);
 			}
