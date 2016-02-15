@@ -29,8 +29,8 @@ void make_json() {
   root["ra"] = get_rain();
   root["rr"] = rpt_rain_rate();
   root["tF"] = rpt_temp();
-  root["ov"] = getBandgap();
-  root["lux"] = getLux();
+  root["ov"] = getBandgap() / 100.00;
+  root["lux"] = getLux() / 100.00;
   root.printTo(Serial);
   Serial.println();
   rain_cnt = 0;
