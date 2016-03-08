@@ -50,7 +50,7 @@ Adafruit_TSL2561_Unified tsl0 = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 123
 volatile unsigned long int vel = 0;
 volatile unsigned long int rain_cnt = 0;
 const float per_tip = 0.0110;
-int rpt_ms = 5000;
+int rpt_ms = 15000;
 int rpt_sec = rpt_ms / 1000;
 int analog_lux = 0;
 int battVolts;
@@ -144,6 +144,10 @@ void dbug() {
   Serial.print("light reading ");
   Serial.println(get_lux0());
   Serial.println();
+  Serial.print("broad band light");
+  Serial.println(get_bb_light());
+  Serial.print("infrared light");
+  Serial.println(get_ir_light());
   Serial.println("Debug End");
 }
 //############################################

@@ -129,7 +129,9 @@ float get_lux0() {
   {
     /* If event.light = 0 lux the sensor is probably saturated
        and no reliable data could be generated! */
-    Serial.println("Sensor overload");
+    if (debugger == true) {
+      Serial.println("Sensor overload");
+    }
   }
 }
 //#####################################################################
