@@ -59,6 +59,8 @@ if ( $params{'query'} eq "a") {
    get_wind();
    get_op_volts();
    get_lux();
+#   get_ir();
+#  get_bb();
 } elsif ($params{'query'} eq "w") {
    get_wind();
 } elsif ($params{'query'} eq "o") {
@@ -102,7 +104,7 @@ sub get_temp {
       showInLegend: true,
       legendText: "Temperature(F)",       
       dataPoints: [ ';
-   print "\n$json ] }, \n";
+   print "\n$json \n]\n }, \n";
 }
 ##########################################################################
 # return json data of wind readings
@@ -137,7 +139,7 @@ sub get_wind {
       showInLegend: true,
       legendText: "Wind Speed(mph)",         
       dataPoints: [ ';
-      print "$json ] },\n";
+      print "\n$json \n] \n},\n";
 }
 
 ##########################################################################
@@ -178,7 +180,7 @@ sub get_op_volts {
       legendText: "Operating Volts(V)",
       valueFormatSting: "#,,.",
       dataPoints: [ ';
-      print "$json ] },\n";
+      print "\n$json \n] \n},\n";
 }
 
 
@@ -186,7 +188,7 @@ sub get_op_volts {
 # return json data of light sensor readings
 sub get_lux {
    my $row;
-   my $query = qq(select * from lux where lux.ts >= (select datetime('now', '$time_back')) order by ts);
+   my $query = qq(select lux.ts, lux.lux from lux where lux.ts >= (select datetime('now', '$time_back')) order by ts);
 
    my $sth = $dbh->prepare($query);
 
@@ -200,7 +202,7 @@ sub get_lux {
          $item{$header} = $row->{$header};
          chomp($item{$header});
       }
-      push(@items, exhibit_pm::canvasjs::make_item("analog_val",\%item));
+      push(@items, exhibit_pm::canvasjs::make_item("lux",\%item));
    }
 
    $sth->finish;
@@ -214,8 +216,75 @@ sub get_lux {
       showInLegend: true,
       legendText: "Light Intensity(V)",
       dataPoints: [ ';
-   print "$json ] }\n";
+   print "\n$json \n] \n}\n";
 }
 
 
 #####################################################################################
+# return json data of light sensor readings (infrared)
+sub get_ir {
+   my $row;
+   my $query = qq(select lux.ts, lux.infrared from lux where lux.ts >= (select datetime('now', '$time_back')) order by ts);
+
+   my $sth = $dbh->prepare($query);
+
+   $sth->execute();
+
+   my (@items,$json);
+
+   while ($row = $sth->fetchrow_hashref) {
+      my %item;
+      foreach my $header (keys %$row) {
+         $item{$header} = $row->{$header};
+         chomp($item{$header});
+      }
+      push(@items, exhibit_pm::canvasjs::make_item("infrared",\%item));
+   }
+
+   $sth->finish;
+   $json = "";
+   foreach my $item (@items) {
+      $json = "$json" . "$item" . ",\n";
+   }
+   $json =~ s/\,\n$//;
+   print '{
+      type: "line",
+      showInLegend: true,
+      legendText: "Inrared Intensity(V)",
+      dataPoints: [ ';
+   print "\n$json \n] \n}\n";
+}
+#####################################################################################
+# return json data of light sensor readings (broadband)
+sub get_bb {
+   my $row;
+   my $query = qq(select lux.ts, lux.broadband from lux where lux.ts >= (select datetime('now', '$time_back')) order by ts);
+
+   my $sth = $dbh->prepare($query);
+
+   $sth->execute();
+
+   my (@items,$json);
+
+   while ($row = $sth->fetchrow_hashref) {
+      my %item;
+      foreach my $header (keys %$row) {
+         $item{$header} = $row->{$header};
+         chomp($item{$header});
+      }
+      push(@items, exhibit_pm::canvasjs::make_item("broadband",\%item));
+   }
+
+   $sth->finish;
+   $json = "";
+   foreach my $item (@items) {
+      $json = "$json" . "$item" . ",\n";
+   }
+   $json =~ s/\,\n$//;
+   print '{
+      type: "line",
+      showInLegend: true,
+      legendText: "Inrared Intensity(V)",
+      dataPoints: [ ';
+   print "\n$json \n] \n}\n";
+}
