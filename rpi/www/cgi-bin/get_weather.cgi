@@ -60,278 +60,95 @@ END_END
 ##########################################################
 print "$start\n";
 
+my $args = {
+   t => {
+      q => qq(select temp.ts, temp.temperature from temp where temp.ts >= '$time_back' order by ts),
+      l => "Temperature"
+   },
+   w => {
+      q => qq(select speed.ts, speed.speed from speed where speed.ts >= '$time_back' order by ts),
+      l => "Wind Speed"
+   },
+   ra => {
+      q => qq(select rain.ts, rain.amount from rain where rain.ts >= '$time_back' order by ts),
+      l => "Rain Amount"
+   },     
+   rr => {
+      q => qq(select rain.ts, rain.rate from rain where rain.ts >= '$time_back' order by rain.ts),
+      l => "Rain Rate"
+   },
+   l => {
+      q => qq(select lux.ts, lux.lux from lux where lux.ts >= '$time_back' order by ts),
+      l => "Lux"
+   },
+   bb => {
+      q => qq(select lux.ts, lux.broadband from lux where lux.ts >= '$time_back' order by ts),
+      l => "Broadband"
+   },  
+   ir => {
+      q => qq(select lux.ts, lux.infrared from lux where lux.ts >= '$time_back' order by ts),
+      l => "Ifrared"
+   },
+   o => {
+      q => qq(select op_volt.ts, op_volt.volts from op_volt where op_volt.ts >= '$time_back' order by ts),
+      l => "Operating Volts"
+   }
+};
+
 if ( $params{'query'} eq "a") {
-   get_temp();
-   get_wind();
-   get_op_volts();
-   get_lux();
-   get_ir();
-   get_bb();
+   get_data($args->{t}->{q}, $args->{t}->{l});
+   get_data($args->{w}->{q}, $args->{w}->{l});
+   get_data($args->{o}->{q}, $args->{o}->{l});
+   get_data($args->{l}->{q}, $args->{l}->{l});
+   get_data($args->{ir}->{q}, $args->{ir}->{l});
+   get_data($args->{bb}->{q}, $args->{bb}->{l});
 } elsif ($params{'query'} eq "w") {
-   get_wind();
-   get_temp();
-   get_ra();
-   get_rr();
+   get_data($args->{t}->{q}, $args->{t}->{l});
+   get_data($args->{w}->{q}, $args->{w}->{l});
+   get_data($args->{rr}->{q}, $args->{rr}->{l});
+   get_data($args->{ra}->{q}, $args->{ra}->{l});
 } elsif ($params{'query'} eq "o") {
-   get_op_volts();
+   get_data($args->{o}->{q}, $args->{o}->{l});
 } elsif ($params{'query'} eq "l") {
-   get_lux();
-   get_ir();
-   get_bb();
-} elsif ($params{'query'} eq "d") {
-   get_temp();
+   get_data($args->{l}->{q}, $args->{l}->{l});
+   get_data($args->{ir}->{q}, $args->{ir}->{l});
+   get_data($args->{bb}->{q}, $args->{bb}->{l});
 }
 
 ################
 print "$end\n";
 $dbh->disconnect;
+
 ##########################################################################################################
-# return json data of temperature readings
-sub get_temp {
-   my $row;
-   my $query = qq(select * from temp where temp.ts >= '$time_back' order by ts);
+sub get_data {
+   my ($query, $label) = @_;
+   my ($row, @items, $json, $y_header);
    my $sth = $dbh->prepare($query);
-
    $sth->execute();
-
-   my (@items,$json);
-
    while ($row = $sth->fetchrow_hashref) {
       my %item;
       foreach my $header (keys %$row) {
          $item{$header} = $row->{$header};
          chomp($item{$header});
-      }
-      push(@items, exhibit_pm::canvasjs::make_item("temperature",\%item));
-   }
-   $sth->finish;
-   $json = "";
-   foreach my $item (@items) {
-      $json = "$json" . "$item" . ",\n";
-   }
-   $json =~ s/\,\n$//;
-   print '{
-      type: "line",
-      axisYType: "primary",
-      showInLegend: true,
-      legendText: "Temperature(F)",       
-      dataPoints: [ ';
-   print "\n$json \n]\n }, \n";
-}
-##########################################################################
-# return json data of wind readings
-sub get_wind {
-   my $row;
-   my $query = qq(select * from speed where speed.ts >= '$time_back' order by ts);
-   my $sth = $dbh->prepare($query);
-
-   $sth->execute();
-
-   my (@items,$json);
-
-   while ($row = $sth->fetchrow_hashref) {
-      my %item;
-      foreach my $header (keys %$row) {
-         $item{$header} = $row->{$header};
-         chomp($item{$header});
-      }
-      push(@items, exhibit_pm::canvasjs::make_item("speed",\%item));
-   }
-
-   $sth->finish;
-   $json = "";
-   foreach my $item (@items) {
-      $json = "$json" . "$item" . ",\n";
-   }
-   $json =~ s/\,\n$//;
-   print '{
-      type: "line",
-      axisYType: "primary",
-      showInLegend: true,
-      legendText: "Wind Speed(mph)",         
-      dataPoints: [ ';
-      print "\n$json \n] \n},\n";
-}
-
-##########################################################################
-# return json data of operating voltage readings
-sub get_op_volts {
-   my $row;
-   my $query = qq(select * from op_volt where op_volt.ts >= '$time_back' order by ts);
-
-   my $sth = $dbh->prepare($query);
-
-   $sth->execute();
-
-   my (@items,$json);
-
-   while ($row = $sth->fetchrow_hashref) {
-      my %item;
-      foreach my $header (keys %$row) {
-         if ($header =~ 'ts') {
-            $item{$header} = $row->{$header};
-         } else {
-            $item{$header} = $row->{$header} * 0.01;
+         if ($header !~ /^ts$/) {
+            $y_header = $header;
          }
-         chomp($item{$header});
       }
-      push(@items, exhibit_pm::canvasjs::make_item("volts",\%item));
+      push(@items, exhibit_pm::canvasjs::make_item($y_header,\%item));
    }
-
    $sth->finish;
    $json = "";
    foreach my $item (@items) {
       $json = "$json" . "$item" . ",\n";
    }
    $json =~ s/\,\n$//;
-   print '{
+   print qq( {
       type: "line",
-      axisYType: "secondary",
+      axisYType: "primary",
       showInLegend: true,
-      legendText: "Operating Volts(V)",
-      valueFormatSting: "#,,.",
-      dataPoints: [ ';
-      print "\n$json \n] \n},\n";
-}
-
-
-#####################################################################################
-# return json data of light sensor readings
-sub get_lux {
-   my $row;
-   my $query = qq(select lux.ts, lux.lux from lux where lux.ts >= '$time_back' order by ts);
-
-   my $sth = $dbh->prepare($query);
-
-   $sth->execute();
-
-   my (@items,$json);
-
-   while ($row = $sth->fetchrow_hashref) {
-      my %item;
-      foreach my $header (keys %$row) {
-         $item{$header} = $row->{$header};
-         chomp($item{$header});
-      }
-      push(@items, exhibit_pm::canvasjs::make_item("lux",\%item));
-   }
-
-   $sth->finish;
-   $json = "";
-   foreach my $item (@items) {
-      $json = "$json" . "$item" . ",\n";
-   }
-   $json =~ s/\,\n$//;
-   print '{
-      type: "line",
-      showInLegend: true,
-      legendText: "Light Intensity(V)",
-      dataPoints: [ ';
-   print "\n$json \n] \n},\n";
-}
-
-
-#####################################################################################
-# return json data of light sensor readings (infrared)
-sub get_ir {
-   my $row;
-   my $query = qq(select lux.ts, lux.infrared from lux where lux.ts >= '$time_back' order by ts);
-
-   my $sth = $dbh->prepare($query);
-
-   $sth->execute();
-
-   my (@items,$json);
-
-   while ($row = $sth->fetchrow_hashref) {
-      my %item;
-      foreach my $header (keys %$row) {
-         $item{$header} = $row->{$header};
-         chomp($item{$header});
-      }
-      push(@items, exhibit_pm::canvasjs::make_item("infrared",\%item));
-   }
-
-   $sth->finish;
-   $json = "";
-   foreach my $item (@items) {
-      $json = "$json" . "$item" . ",\n";
-   }
-   $json =~ s/\,\n$//;
-   print '{
-      type: "line",
-      showInLegend: true,
-      legendText: "Infrared Intensity(V)",
-      dataPoints: [ ';
-   print "\n$json \n] \n},\n";
-}
-#####################################################################################
-# return json data of light sensor readings (broadband)
-sub get_bb {
-   my $row;
-   my $query = qq(select lux.ts, lux.broadband from lux where lux.ts >= '$time_back' order by ts);
-
-   my $sth = $dbh->prepare($query);
-
-   $sth->execute();
-
-   my (@items,$json);
-
-   while ($row = $sth->fetchrow_hashref) {
-      my %item;
-      foreach my $header (keys %$row) {
-         $item{$header} = $row->{$header};
-         chomp($item{$header});
-      }
-      push(@items, exhibit_pm::canvasjs::make_item("broadband",\%item));
-   }
-
-   $sth->finish;
-   $json = "";
-   foreach my $item (@items) {
-      $json = "$json" . "$item" . ",\n";
-   }
-   $json =~ s/\,\n$//;
-   print '{
-      type: "line",
-      showInLegend: true,
-      legendText: "Broadband Intensity(V)",
-      dataPoints: [ ';
-   print "\n$json \n] \n},\n";
-}
-#####################################################################################
-# return json data of rain sensor readings (amount)
-sub get_ra {
-   my $row;
-   my $query = qq(select rain.ts, rain.amount from rain where rain.ts >= '$time_back' order by ts);
-
-   my $sth = $dbh->prepare($query);
-
-   $sth->execute();
-
-   my (@items,$json);
-
-   while ($row = $sth->fetchrow_hashref) {
-      my %item;
-      foreach my $header (keys %$row) {
-         $item{$header} = $row->{$header};
-         chomp($item{$header});
-      }
-      push(@items, exhibit_pm::canvasjs::make_item("rain_amount",\%item));
-   }
-
-   $sth->finish;
-   $json = "";
-   foreach my $item (@items) {
-      $json = "$json" . "$item" . ",\n";
-   }
-   $json =~ s/\,\n$//;
-   print '{
-      type: "line",
-      showInLegend: true,
-      legendText: "Rain Amount",
-      dataPoints: [ ';
-   print "\n$json \n] \n},\n";
+      legendText: '$label',       
+      dataPoints: [ );
+   print "\n$json \n]\n }, \n";
 }
 ##############################################################
 sub get_hour_back {
@@ -339,36 +156,3 @@ sub get_hour_back {
    return sprintf("%04d-%02d-%02dT%02d:%02d:%02dZ", Add_Delta_DHMS(Today_and_Now(), 0, $hours, 0, 0));
 }
 #####################################################################################
-# return json data of rain sensor readings (rate)
-sub get_rr {
-   my $row;
-   my $query = qq(select rain.ts, rain.rate from rain where rain.ts >= '$time_back' order by rain.ts);
-
-   my $sth = $dbh->prepare($query);
-
-   $sth->execute();
-
-   my (@items,$json);
-
-   while ($row = $sth->fetchrow_hashref) {
-      my %item;
-      foreach my $header (keys %$row) {
-         $item{$header} = $row->{$header};
-         chomp($item{$header});
-      }
-      push(@items, exhibit_pm::canvasjs::make_item("rain_rate",\%item));
-   }
-
-   $sth->finish;
-   $json = "";
-   foreach my $item (@items) {
-      $json = "$json" . "$item" . ",\n";
-   }
-   $json =~ s/\,\n$//;
-   print '{
-      type: "line",
-      showInLegend: true,
-      legendText: "Rain Rate",
-      dataPoints: [ ';
-   print "\n$json \n] \n},\n";
-}

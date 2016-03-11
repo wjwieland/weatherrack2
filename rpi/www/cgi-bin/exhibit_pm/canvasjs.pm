@@ -11,11 +11,11 @@ our $VERSION=0.10;
 
 ########################################################################
 sub make_item {
-	my $data_label = shift;
+	my $y_header = shift;
 	my $db_row = shift;
 	my $ds = %$db_row{"ts"};
 	my $date_obj = make_date($ds);
-	return $date_obj . 'y: ' . %$db_row{$data_label} . ' }';
+	return $date_obj . 'y: ' . %$db_row{$y_header} . ' }';
 }
 #########################################################################
 sub make_date {
