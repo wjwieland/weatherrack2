@@ -2,7 +2,6 @@
 use Modern::Perl;
 use Device::SerialPort;
 use DBI;
-use Switch;
 use DateTime;
 #use Device::XBee::API;
 
@@ -43,62 +42,62 @@ while (1) {
 	my $char = $dev->lookfor();	
 	$cnt++;	
 	if ($char) {
-	    if ($debug == 1) {
-			print " $char \n";
+		if ($debug == 1) {
+			print " $char ";
 		}
-	    my $timestamp = uts_to_iso(time());
+	  my $timestamp = uts_to_iso(time());
 		my $line = $char;
 		chomp($line);
 		$line =~ s/\{//g; $line =~ s/\}//g;	$line =~ s/\"//g; $line =~ s/\n,//g;
 		my @lines = split(/\,/, $line);
 		$hash{'count'} = $cnt;
 		foreach my $field (@lines) {
-	   	    ($key, $val) = split(/\:/, $field);
-	   	    if ($debug == 1) {
-				say "$timestamp $key  =  $val";
-		    }
+	   	($key, $val) = split(/\:/, $field);
+	   	if ($debug == 1) {
+			say "$timestamp $key  =  $val";
+		}
 	   		$hash{$key} = $val;
 		}
 		if ($debug == 1) {
 			say "\n";
 		}
 		foreach (sort keys %hash) {	
-		    next if $_ =~ m/rr/;              #rain rate gets filled in when there is rain amount(ra)
-		    if (($_ =~ m/wv/) && ($hash{$_} != $last{$_})) {
+			next if $_ =~ m/rr/;              #rain rate gets filled in when there is rain amount(ra)
+		  	if (($_ =~ m/wv/) && ($hash{$_} != $last{$_})) {
 	   			$q = qq(insert into speed (ts, speed) values ( '$timestamp', $hash{$_})); 
 				$dbh->do($q);
-		    }
-		    if (($_ =~ m/wd/) && ($hash{$_} != $last{$_}) && ($_ >= 0) ) {
+			}
+		  	if (($_ =~ m/wd/) && ($hash{$_} != $last{$_}) && ($_ >= 0) ) {
     			$q = qq(insert into direction (ts, direction) values ( '$timestamp', $hash{$_})); 
 				$dbh->do($q);
-		    } 
-   		    if (($_ =~ /ra/) && ($hash{$_} > 0)) { 
+		 	} 
+   			if (($_ =~ /ra/) && ($hash{$_} > 0)) { 
 				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'$_'}, $hash{'rr'})); 
 				$dbh->do($q);
-		    }
+		 	}
        		if ( ($_ =~ /tF/) && (abs($hash{$_} - $last{$_}) >= 0.2 ) ) { 
 				$q = qq(insert into temp (ts, temperature) values ( '$timestamp', $hash{'tF'})); 
 				$dbh->do($q);
-		    }
+		 	}
 	    	if ( ( $_ =~ /ov/i ) && ($hash{$_} != $last{$_} ) ) {
 				$q = qq(insert into op_volt (ts, volts) values ('$timestamp', $hash{'ov'}));
 				$dbh->do($q);
 			}
-		    if ( ($_ =~ /lux/i) && (abs(($hash{$_} - $last{$_} )) > 0.1 ) ) {
+		  	if ( ($_ =~ /lux/i) && (abs(($hash{$_} - $last{$_} )) > 0.1 ) ) {
 				$q = qq(insert into lux (ts, lux, broadband, infrared) values ('$timestamp', $hash{'lux'}, $hash{'bbl'}, $hash{'irl'}));
 				$dbh->do($q);
 			}							
-		    if ($debug == 1) {
-			    	print "Query is $q\n";
-		    }
+		 	if ($debug == 1) {
+				print "Query is $q\n";
+		  	}
 			$q = '';	#clear the query string so debugging is not confusing.
-   		}
+   	}
 		%last = %hash;  #copy current to last hash for next compare
 	}	
 	if ($profile == 1) {
-	    if ($cnt >= 25) {
+		if ($cnt >= 25) {
 			exit;
-	    } else {
+	 	} else {
 			print "Count is $cnt\n";
 		}
 	}
