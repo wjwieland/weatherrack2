@@ -91,7 +91,7 @@ TimerObject *report = new TimerObject(rpt_ms);
 TimerObject *debug  = new TimerObject(rpt_ms);
 //############################################3
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(pinVel, INPUT_PULLUP);
   pinMode(pinRain, INPUT_PULLUP);
   pinMode(pinTmp, INPUT_PULLUP);
@@ -105,7 +105,9 @@ void setup() {
     while(1);
   } else {
     configureSensor();
-    displaySensorDetails();
+    if (debugger == true) {
+      displaySensorDetails();
+    }
   }
   
   sensors.begin();

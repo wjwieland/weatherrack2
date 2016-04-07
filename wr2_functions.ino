@@ -16,22 +16,24 @@ float get_rain() {
 }
 //####################################################
 void make_json() {
-  StaticJsonBuffer<200> jsonBuffer;
+  StaticJsonBuffer<300> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
   root["wv"] = rpt_velocity();
   root["wd"] = get_dir();
-  root["ra"] = get_rain();
-  root["rr"] = rpt_rain_rate();
   root["tF"] = rpt_temp();
   root["ov"] = getBandgap() / 100.00;
   root["lux"] = get_lux0();
   root["bbl"] = get_bb_light();
   root["irl"] = get_ir_light();
+  if (rain_cnt > 0) {
+    root["ra"] = get_rain();
+    root["rr"] = rpt_rain_rate();
+  }
   root.printTo(Serial);
-  Serial.println();
+  Serial.println();  
   rain_cnt = 0;
   vel = 0;  
- }
+}
 //###################################################
 // returns inches per second
 float rpt_rain_rate() {
@@ -99,8 +101,7 @@ int getBandgap(void)  {    // Returns actual value of Vcc (x 100) {
 }
 
 /**************************************************************************/
-void configureSensor(void)
-{
+void configureSensor(void) {
   /* You can also manually set the gain or enable auto-gain support */
   // tsl0.setGain(TSL2561_GAIN_1X);      /* No gain ... use in bright light to avoid sensor saturation */
   // tsl0.setGain(TSL2561_GAIN_16X);     /* 16x gain ... use in low light to boost sensitivity */
@@ -109,11 +110,13 @@ void configureSensor(void)
   //tsl0.setIntegrationTime(TSL2561_INTEGRATIONTIME_13MS);      /* fast but low resolution */
   //tsl0.setIntegrationTime(TSL2561_INTEGRATIONTIME_101MS);  /* medium resolution and speed   */
   tsl0.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
-  /* Update these values depending on what you've set above! */  
+  /* Update these values depending on what you've set above! */
+  if (debugger == true) {
   Serial.println("------------------------------------");
   Serial.print  ("Gain:         "); Serial.println("Auto");
   Serial.print  ("Timing:       "); Serial.println("402 ms");
   Serial.println("------------------------------------");
+  }
 }
 //#################################################################################
 float get_lux0() {
