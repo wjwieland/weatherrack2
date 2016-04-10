@@ -53,7 +53,7 @@ my $end = << 'END_END';
 </script>
 </head>
 <body>
-<div id="chartContainer" style="height: 600px; width: 100%;"></div>
+<div id="chartContainer" style="height: 600px; width:90%;"></div>
 </body>
 </html>
 END_END
@@ -87,11 +87,11 @@ my $args = {
    },  
    ir => {
       q => qq(select lux.ts, lux.infrared from lux where lux.ts >= '$time_back' order by ts),
-      l => "Ifrared"
+      l => "Infrared"
    },
    o => {
-      q => qq(select op_volt.ts, op_volt.volts from op_volt where op_volt.ts >= '$time_back' order by ts),
-      l => "Operating Volts"
+      q => qq(select op_volt.ts, op_volt.volts * 1000 from op_volt where op_volt.ts >= '$time_back' order by ts),
+      l => "Operating Volts (u/V)"
    }
 };
 
@@ -113,6 +113,7 @@ if ( $params{'query'} eq "a") {
    get_data($args->{l}->{q}, $args->{l}->{l});
    get_data($args->{ir}->{q}, $args->{ir}->{l});
    get_data($args->{bb}->{q}, $args->{bb}->{l});
+   get_data($args->{o}->{q}, $args->{o}->{l});
 }
 
 ################
