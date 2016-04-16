@@ -60,13 +60,16 @@ while (1) {
 			}
 		}
 		foreach (sort keys %hash) {	
+			if ( $hash{$_} != $last{$_} ) {
+				$q = qq(insert into connection_tracking ( ts, $_ ) values ( '$timestamp', '1' ) );
+				$dbh->do($q);
+			} else {
+				$q = qq(insert into connection_tracking ( ts, $_ ) values ( '$timestamp', '0' ) );
+				$dbh->do($q);				
+			}
 			if ($debug == 1) {
 				say "Found key $_ = $hash{$_}";
 				say "Prev. val    = $last{$_}";
-				if ( $hash{$_} != $last{$_} ) {
-					$q = qq(insert into connection_tracking ( ts, $_ ) values ( '$timestamp', $hash{$_} ) );
-					$dbh->do($q);
-				}
 			}
 			next if $_ =~ m/rr/;              #rain rate gets filled in when there is rain amount(ra)
 	  		if (($_ =~ m/wv/) && ($hash{$_} != $last{$_})) {
