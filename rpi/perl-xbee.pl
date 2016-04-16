@@ -51,7 +51,7 @@ while (1) {
 		chomp($line);
 		$line =~ s/\{//g; $line =~ s/\}//g;	$line =~ s/\"//g; $line =~ s/\n,//g;
 		my @lines = split(/\,/, $line);
-		$hash{'count'} = $cnt;
+#		$hash{'count'} = $cnt;
 		foreach my $field (@lines) {
 	   		($key, $val) = split(/\:/, $field);
 	   		$hash{$key} = $val;
@@ -59,14 +59,16 @@ while (1) {
 				say "$timestamp $key  =  $val";
 			}
 		}
+#		$q = qq(insert into connection_tracking ( ts ) values ( '$timestamp') );
+#		$dbh->do($q);		
 		foreach (sort keys %hash) {	
-			if ( $hash{$_} != $last{$_} ) {
-				$q = qq(insert into connection_tracking ( ts, $_ ) values ( '$timestamp', '1' ) );
-				$dbh->do($q);
-			} else {
-				$q = qq(insert into connection_tracking ( ts, $_ ) values ( '$timestamp', '0' ) );
-				$dbh->do($q);				
-			}
+#			if ( $hash{$_} != $last{$_}  ) {
+#				$q = qq(update connection_tracking set '$_'  = '1' where 'ts' like '$timestamp' );
+#				$dbh->do($q);
+#			} else {
+#				$q = qq(update connection_tracking set  '$_'  = '0' where 'ts' like '$timestamp' );
+#				$dbh->do($q);				
+#			}
 			if ($debug == 1) {
 				say "Found key $_ = $hash{$_}";
 				say "Prev. val    = $last{$_}";
