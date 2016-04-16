@@ -19,7 +19,7 @@ my $start = << 'END_START';
 <head>
 <meta http-equiv="Refresh" content="30"/>
 <script src="../javascript/canvasjs.min.js"></script>
-<script src="../javascript/jquery-2.2.0.min.js"></script>
+<script src="../javascript/jquery-2.2.3.js"></script>
 <script type="text/javascript">
 
 window.onload = function () {
@@ -54,6 +54,26 @@ my $end = << 'END_END';
 </head>
 <body>
 <div id="chartContainer" style="height: 600px; width:90%;"></div>
+
+<div id="slider-holder" style="height: 75px; width:40%;">
+<form action="http://192.168.0.11/cgi-bin/get_weather.cgi" method="get">
+   Hours back in time:<br>
+   <input id="slider" type="range" name="time" min="-36" max="-1" step="1" value="-1" width="40%" onchange="printValue('slider','textbox1')">
+   <input id="textbox1" type="text" size="2"><br>
+   <input type="radio" name="query" value="w" checked> Weather<br>
+   <input type="radio" name="query" value="l"> Light<br>
+   <input type="radio" name="query" value="o"> Operating Voltage<br>     
+   <input type="submit">
+</form>
+</div><br/>
+<script>
+    function printValue(a, b) {
+        var x = document.getElementById(a);
+        var y = document.getElementById(b);
+        y.value = x.value;
+    }
+</script>
+
 </body>
 </html>
 END_END
@@ -90,8 +110,8 @@ my $args = {
       l => "Infrared"
    },
    o => {
-      q => qq(select op_volt.ts, op_volt.volts * 1000 from op_volt where op_volt.ts >= '$time_back' order by ts),
-      l => "Operating Volts (u/V)"
+      q => qq(select op_volt.ts, (op_volt.volts * 1000) from op_volt where op_volt.ts >= '$time_back' order by ts),
+      l => "Operating Volts (m/V)"
    }
 };
 

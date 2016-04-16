@@ -6,7 +6,7 @@ use DateTime;
 #use Device::XBee::API;
 my $dbfile = "/home/wjw/weather.sql3";
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile" ,"","");
-my ($key,$val, %rx, $q, $cnt, %last, %hash, $sth, $char_cnt, $char, $timeout, $buffer);
+my ($key,$val, %rx, $q, $cnt, %last, %hash, $sth, $char_cnt, $char, $timeout, $buffer, $timestamp);
 
 %last = 
     (
@@ -46,7 +46,7 @@ while (1) {
    		if ($debug == 1) {
  			say "Raw input is -> $char";
        	}
-       	my $timestamp = uts_to_iso(time());
+       	$timestamp = uts_to_iso(time());
 		my $line = $char;
 		chomp($line);
 		$line =~ s/\{//g; $line =~ s/\}//g;	$line =~ s/\"//g; $line =~ s/\n,//g;
@@ -63,13 +63,17 @@ while (1) {
 			if ($debug == 1) {
 				say "Found key $_ = $hash{$_}";
 				say "Prev. val    = $last{$_}";
+				if ( $hash{$_} != $last{$_} ) {
+					$q = qq(insert into connection_tracking ( ts, $_ ) values ( '$timestamp', $hash{$_} ) );
+					$dbh->do($q);
+				}
 			}
 			next if $_ =~ m/rr/;              #rain rate gets filled in when there is rain amount(ra)
 	  		if (($_ =~ m/wv/) && ($hash{$_} != $last{$_})) {
    				$q = qq(insert into speed (ts, speed) values ( '$timestamp', $hash{$_})); 
 				$dbh->do($q);
 	  		}
-	  		if (($_ =~ m/wd/i) && ($hash{$_} != $last{$_}) && ($_ >= 0) ) {
+	  		if (($_ =~ m/wd/i) && ($hash{$_} != $last{$_}) && ($hash{$_} >= 0) ) {
 				$q = qq(insert into direction (ts, direction) values ( '$timestamp', $hash{$_})); 
 				$dbh->do($q);			
 	 		} 
