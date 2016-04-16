@@ -25,10 +25,10 @@ void make_json() {
   root["lux"] = get_lux0();
   root["bbl"] = get_bb_light();
   root["irl"] = get_ir_light();
-  if (rain_cnt > 0) {
-    root["ra"] = get_rain();
-    root["rr"] = rpt_rain_rate();
-  }
+  //if (rain_cnt > 0) {
+  root["ra"] = get_rain();
+  root["rr"] = rpt_rain_rate();
+  //}
   root.printTo(Serial);
   Serial.println();  
   rain_cnt = 0;

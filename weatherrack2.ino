@@ -102,7 +102,7 @@ void setup() {
   if(!tsl0.begin()) {
     /* There was a problem detecting the ADXL345 ... check your connections */
     Serial.print("Ooops, first TSL2561 not detected ... Check your wiring or I2C ADDR!");
-    while(1);
+    //while(1);
   } else {
     configureSensor();
     if (debugger == true) {
