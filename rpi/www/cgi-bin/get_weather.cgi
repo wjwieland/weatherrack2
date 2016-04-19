@@ -55,14 +55,15 @@ my $end = << 'END_END';
 <body>
 <div id="chartContainer" style="height: 600px; width:90%;"></div>
 
-<div id="slider-holder" style="height: 75px; width:40%;">
+<div id="slider-holder" style="height: 75px; width:800px;">
 <form action="http://192.168.0.11/cgi-bin/get_weather.cgi" method="get">
-   Hours back in time:<br>
-   <input id="slider" type="range" name="time" min="-36" max="-1" step="1" value="-1" width="40%" onchange="printValue('slider','textbox1')">
-   <input id="textbox1" type="text" size="2"><br>
-   <input type="radio" name="query" value="w" checked> Weather<br>
-   <input type="radio" name="query" value="l"> Light<br>
-   <input type="radio" name="query" value="o"> Operating Voltage<br>     
+   Hours back in time:    ->    
+   <input id="slider" type="range" name="time" min="-36" max="-1" step="1" value="-2" onchange="printValue('slider','textbox1')">
+   <input id="textbox1" type="text" size="4"> Hours Back    |
+   <input type="radio" name="query" value="w" checked> Wind&Rain    |
+   <input type="radio" name="query" value="r"> Rain    |   
+   <input type="radio" name="query" value="l"> Light    |
+   <input type="radio" name="query" value="o"> Operating Voltage<br>  
    <input type="submit">
 </form>
 </div><br/>
@@ -134,8 +135,10 @@ if ( $params{'query'} eq "a") {
    get_data($args->{ir}->{q}, $args->{ir}->{l});
    get_data($args->{bb}->{q}, $args->{bb}->{l});
    get_data($args->{o}->{q}, $args->{o}->{l});
+} elsif ($params{'query'} eq "r") {
+   get_data($args->{rr}->{q}, $args->{rr}->{l});
+   get_data($args->{ra}->{q}, $args->{ra}->{l});
 }
-
 ################
 print "$end\n";
 $dbh->disconnect;
