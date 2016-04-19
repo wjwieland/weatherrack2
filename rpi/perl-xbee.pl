@@ -22,10 +22,10 @@ my ($key,$val, %rx, $q, $cnt, %last, %hash, $sth, $char_cnt, $char, $timeout, $b
     );
 # Set up the serial port
 my $dev = Device::SerialPort->new("/dev/ttyUSB0") || warn "Can't open /dev/ttyUSB0  $!";
-my $debug = 0;	#set to 1 if debug print statements are to be displayed
+my $debug = 1;	#set to 1 if debug print statements are to be displayed
 my $profile = 0; # set to '1' when running NYTProfile.  Limits run length...
 # 19200, 81N on the USB ftdi driver
-$dev->baudrate(115200); # you may change this value
+$dev->baudrate(9600); # you may change this value
 $dev->databits(8);      # but not this and the two following
 $dev->parity("none");
 $dev->stopbits(1);
@@ -83,7 +83,7 @@ while (1) {
 				$dbh->do($q);			
 	 		} 
 				if (($_ =~ m/ra/i) && ($hash{$_} > 0)) { 
-				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'$_'}, $hash{'rr'})); 
+				$q = qq(insert into rain (ts, amount, rate) values ( '$timestamp', $hash{'ra'}, $hash{'rr'})); 
 				$dbh->do($q);				
 	 		}
        		if ( ($_ =~ m/tF/i) && ($hash{$_} != $last{$_}) ) { 
@@ -98,7 +98,7 @@ while (1) {
 				$q = qq(insert into lux (ts, lux, broadband, infrared) values ('$timestamp', $hash{'lux'}, $hash{'bbl'}, $hash{'irl'}));
 				$dbh->do($q);		
 			}
-			if ( ($debug == 1) && (length($q) > 0) ) {
+			if ($debug == 1) {
 				sayq($q);
 			} elsif ( ($debug == 1) && (length($q) < 1) ) {
 				say "empty query!";
