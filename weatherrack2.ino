@@ -146,9 +146,9 @@ void dbug() {
   Serial.print("light reading ");
   Serial.println(get_lux0());
   Serial.println();
-  Serial.print("broad band light");
+  Serial.print("broad band light ");
   Serial.println(get_bb_light());
-  Serial.print("infrared light");
+  Serial.print("infrared light ");
   Serial.println(get_ir_light());
   Serial.println("Debug End");
 }
