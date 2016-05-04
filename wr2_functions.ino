@@ -103,18 +103,18 @@ int getBandgap(void)  {    // Returns actual value of Vcc (x 100) {
 /**************************************************************************/
 void configureSensor(void) {
   /* You can also manually set the gain or enable auto-gain support */
-  // tsl0.setGain(TSL2561_GAIN_1X);      /* No gain ... use in bright light to avoid sensor saturation */
+   tsl0.setGain(TSL2561_GAIN_1X);      /* No gain ... use in bright light to avoid sensor saturation */
   // tsl0.setGain(TSL2561_GAIN_16X);     /* 16x gain ... use in low light to boost sensitivity */
-  tsl0.enableAutoRange(true); 
+  //tsl0.enableAutoRange(true); 
   /* Changing the integration time gives you better sensor resolution (402ms = 16-bit data) */
   //tsl0.setIntegrationTime(TSL2561_INTEGRATIONTIME_13MS);      /* fast but low resolution */
-  //tsl0.setIntegrationTime(TSL2561_INTEGRATIONTIME_101MS);  /* medium resolution and speed   */
-  tsl0.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
+  tsl0.setIntegrationTime(TSL2561_INTEGRATIONTIME_101MS);  /* medium resolution and speed   */
+  //tsl0.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
   /* Update these values depending on what you've set above! */
   if (debugger == true) {
   Serial.println("------------------------------------");
   Serial.print  ("Gain:         "); Serial.println("Auto");
-  Serial.print  ("Timing:       "); Serial.println("402 ms");
+  Serial.print  ("Timing:       "); Serial.println("101ms");
   Serial.println("------------------------------------");
   }
 }
